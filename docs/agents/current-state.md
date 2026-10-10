@@ -21,7 +21,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Calibration Engine | `src/solio_calibrate/calibrate.py` | Match-level xG/xGC, leave-one-out Bayesian normalization, auto-weight |
 | CLI Runner | `src/solio_calibrate/cli.py` | CLI executable with `--auto-weight`, `--weight 0.50`, custom input |
 | Sample Output | `data/output/team_strengths_calibrated.csv` | Calibrated Solio CSV export matching exact 3-decimal schema |
-| Agent Skill | `skills/calibrate-team-strength/SKILL.md` | Skill specification with empirical calibration and Home Factor CLI options |
+| Agent Skill | `.agents/skills/calibrate-team-strength/SKILL.md` | Skill specification with empirical calibration and Home Factor CLI options |
 | Architecture Decision | `docs/adr/0001-fpl-empirical-strength-normalization.md` | ADR for empirical normalization, shrinkage, zero-GW fallback |
 
 ---

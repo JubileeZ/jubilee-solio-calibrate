@@ -60,7 +60,7 @@ flowchart TD
 
 ### ⏳ Phase 4: Agent Skill & Delivery (Done)
 
-- [x] Author agent skill `skills/calibrate-team-strength/SKILL.md` for interactive execution.
+- [x] Author agent skill `.agents/skills/calibrate-team-strength/SKILL.md` for interactive execution.
 - [x] End-to-end calibration run and sample output verification in Solio-compatible format.
 - [x] Run full project gate `bash tests/verify.sh`. 
 
