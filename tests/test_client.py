@@ -107,3 +107,87 @@ def test_fpl_client_fetches_with_mock(tmp_path: Path):
 
     assert fixtures == fixtures_data
     assert (cache_dir / "fixtures.json").is_file()
+
+
+def test_calculate_team_empirical_form_empty():
+    from solio_calibrate.client import calculate_team_empirical_form
+
+    stats = calculate_team_empirical_form([])
+    assert "ARS" in stats
+    assert stats["ARS"]["matches_played"] == 0
+    assert stats["ARS"]["empirical_attack_per_match"] == 0.0
+    assert stats["ARS"]["empirical_defense_per_match"] == 0.0
+
+
+def test_calculate_team_empirical_form_matches():
+    from solio_calibrate.client import calculate_team_empirical_form
+
+    matches = [
+        {
+            "id": 1,
+            "event": 1,
+            "home_team": "ARS",
+            "away_team": "COV",
+            "home_goals": 3,
+            "away_goals": 0,
+            "home_xg": 2.5,
+            "away_xg": 0.5,
+        },
+        {
+            "id": 2,
+            "event": 2,
+            "home_team": "MCI",
+            "away_team": "COV",
+            "home_goals": 4,
+            "away_goals": 1,
+            "home_xg": 3.0,
+            "away_xg": 0.8,
+        },
+    ]
+
+    stats = calculate_team_empirical_form(matches)
+    assert stats["ARS"]["matches_played"] == 1
+    assert stats["MCI"]["matches_played"] == 1
+    assert stats["COV"]["matches_played"] == 2
+    # Verify rates are positive and clamped
+    assert stats["ARS"]["empirical_attack_per_match"] > 0.0
+    assert stats["ARS"]["empirical_defense_per_match"] >= 0.0
+
+
+def test_fpl_client_get_event_live_caching(tmp_path: Path):
+    cache_dir = tmp_path / "cache"
+    fake_live = {"elements": [{"id": 1, "stats": {"minutes": 90, "expected_goals": "0.50"}}]}
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_file = cache_dir / "event_live_1.json"
+    cache_file.write_text(json.dumps(fake_live), encoding="utf-8")
+
+    client = FPLClient(cache_dir=cache_dir)
+    result = client.get_event_live(1, force_refresh=False)
+    assert result == fake_live
+
+
+def test_venue_neutralization_in_empirical_form():
+    from solio_calibrate.client import calculate_team_empirical_form
+
+    # 1 match: Team ARS at home scoring 1.644, conceding 1.356 to COV
+    # With home factor h = 0.096, neutralized attack is 1.644 / (1 + 0.096) = 1.500
+    # Neutralized defense is 1.356 / (1 - 0.096) = 1.500
+    matches = [
+        {
+            "id": 1,
+            "event": 1,
+            "home_team": "ARS",
+            "away_team": "COV",
+            "home_goals": 2,
+            "away_goals": 1,
+            "home_xg": 1.288,
+            "away_xg": 1.712,
+        }
+    ]
+    # Pass home_factor=0.096
+    stats = calculate_team_empirical_form(matches, home_factor=0.096)
+    assert stats["ARS"]["raw_attack_per_match"] == pytest.approx(1.500, abs=1e-3)
+    assert stats["ARS"]["raw_defense_per_match"] == pytest.approx(1.500, abs=1e-3)
+    assert "home_factor" in stats["ARS"]
+    assert stats["ARS"]["home_factor"] == pytest.approx(0.096, abs=1e-3)

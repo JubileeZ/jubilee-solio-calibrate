@@ -12,9 +12,9 @@ Adjust and calibrate Solio team attack and defense strengths (`Goals`, `Goals Co
 ## Repo Structure
 
 ```
-├── .agents/skills/solio-calibrate/ # Agent skill to execute calibrations
 ├── data/                           # Solio raw input CSVs and calibrated outputs
 ├── docs/agents/                    # Continuity, roadmap, issue tracking
+├── skills/calibrate-team-strength/ # Agent skill to execute calibrations
 ├── src/solio_calibrate/            # Calibration core package
 │   ├── client.py                   # FPL API fetching & caching
 │   ├── calibrate.py                # Strength adjustment logic

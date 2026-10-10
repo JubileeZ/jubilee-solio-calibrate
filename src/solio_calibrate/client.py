@@ -82,6 +82,135 @@ class FPLClient:
         self._save_cache(cache_file, data)
         return data
 
+    def get_event_live(self, event: int, force_refresh: bool = False) -> dict[str, Any]:
+        """Fetch live element stats for a specific gameweek with caching."""
+        cache_file = f"event_live_{event}.json"
+        if not force_refresh:
+            cached = self._load_cache(cache_file)
+            if cached is not None:
+                return cached
+
+        url = f"{BASE_URL}/event/{event}/live/"
+        client = self._get_client()
+        response = client.get(url)
+        response.raise_for_status()
+        data = response.json()
+        self._save_cache(cache_file, data)
+        return data
+
+    def get_cached_fixtures(self) -> list[dict[str, Any]]:
+        """Return cached fixtures if present on disk, otherwise empty list."""
+        cached = self._load_cache("fixtures.json")
+        return cached if isinstance(cached, list) else []
+
+    def get_match_records(
+        self,
+        force_refresh: bool = False,
+        max_gameweek: int | None = None,
+        offline: bool = False,
+    ) -> list[dict[str, Any]]:
+        """Fetch fixtures, bootstrap data, and live gameweek stats to build match-level records."""
+        if offline:
+            fixtures = self.get_cached_fixtures()
+            bootstrap = self._load_cache("bootstrap_static.json") or {}
+        else:
+            fixtures = self.get_fixtures(force_refresh=force_refresh)
+            bootstrap = self.get_bootstrap_static(force_refresh=force_refresh)
+
+        # Player ID -> Solio team code
+        player_to_team: dict[int, str] = {}
+        for el in bootstrap.get("elements", []):
+            try:
+                player_to_team[el["id"]] = fpl_id_to_code(el["team"])
+            except KeyError:
+                continue
+
+        finished_fixtures = [
+            f
+            for f in fixtures
+            if f.get("finished", False)
+            and f.get("team_h_score") is not None
+            and f.get("team_a_score") is not None
+        ]
+        if max_gameweek is not None:
+            finished_fixtures = [
+                f
+                for f in finished_fixtures
+                if f.get("event") is not None and f["event"] <= max_gameweek
+            ]
+
+        needed_events = sorted({f["event"] for f in finished_fixtures if f.get("event")})
+
+        gw_team_xg: dict[int, dict[str, float]] = {}
+        for ev in needed_events:
+            try:
+                if offline:
+                    live_data = self._load_cache(f"event_live_{ev}.json") or {}
+                else:
+                    live_data = self.get_event_live(ev, force_refresh=force_refresh)
+                gw_team_xg[ev] = {}
+                for el in live_data.get("elements", []):
+                    mins = el.get("stats", {}).get("minutes", 0)
+                    if mins > 0:
+                        eid = el.get("id")
+                        team_code = player_to_team.get(eid)
+                        if team_code:
+                            xg = float(el.get("stats", {}).get("expected_goals", 0.0) or 0.0)
+                            gw_team_xg[ev][team_code] = gw_team_xg[ev].get(team_code, 0.0) + xg
+            except (httpx.HTTPError, OSError, ValueError) as e:
+                logger.warning(f"Could not load live xG for gameweek {ev}: {e}")
+                gw_team_xg[ev] = {}
+
+        records = []
+        for f in finished_fixtures:
+            th_id = f["team_h"]
+            ta_id = f["team_a"]
+            try:
+                th_code = fpl_id_to_code(th_id)
+                ta_code = fpl_id_to_code(ta_id)
+            except KeyError:
+                continue
+
+            ev = f.get("event") or 0
+            h_score = int(f["team_h_score"])
+            a_score = int(f["team_a_score"])
+            h_xg = gw_team_xg.get(ev, {}).get(th_code, float(h_score))
+            a_xg = gw_team_xg.get(ev, {}).get(ta_code, float(a_score))
+
+            records.append({
+                "fixture_id": f["id"],
+                "event": ev,
+                "home_team": th_code,
+                "away_team": ta_code,
+                "home_goals": h_score,
+                "away_goals": a_score,
+                "home_xg": h_xg,
+                "away_xg": a_xg,
+            })
+
+        return records
+
+    def get_team_empirical_stats(
+        self,
+        force_refresh: bool = False,
+        max_gameweek: int | None = None,
+        pseudo_matches: float = 3.0,
+        clamp_min: float = 0.65,
+        clamp_max: float = 1.35,
+        home_factor: float | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Fetch fixtures and live gameweek stats and calculate empirical form."""
+        match_records = self.get_match_records(
+            force_refresh=force_refresh, max_gameweek=max_gameweek
+        )
+        return calculate_team_empirical_form(
+            match_records,
+            pseudo_matches=pseudo_matches,
+            clamp_min=clamp_min,
+            clamp_max=clamp_max,
+            home_factor=home_factor,
+        )
+
     def get_team_actual_stats(
         self,
         force_refresh: bool = False,
@@ -213,3 +342,13 @@ def calculate_team_actual_stats(
         }
 
     return summary
+
+from solio_calibrate.calibrate import calculate_team_empirical_form
+
+__all__ = [
+    "BASE_URL",
+    "DEFAULT_CACHE_DIR",
+    "FPLClient",
+    "calculate_team_actual_stats",
+    "calculate_team_empirical_form",
+]

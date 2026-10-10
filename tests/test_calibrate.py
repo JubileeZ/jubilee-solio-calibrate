@@ -86,3 +86,71 @@ def test_calibrate_global_scaling():
 
     assert result.iloc[0]["Goals"] == pytest.approx(2.10, abs=1e-3)
     assert result.iloc[0]["Goals Conceded"] == pytest.approx(0.95, abs=1e-3)
+
+
+def test_compute_auto_weight_progression():
+    from solio_calibrate.calibrate import compute_auto_weight
+
+    assert compute_auto_weight(0) == 0.0  # Preseason / unplayed
+    assert compute_auto_weight(-1) == 0.0
+    assert compute_auto_weight(3) == 0.30
+    assert compute_auto_weight(5) == 0.50
+    assert compute_auto_weight(15) == 0.65
+    assert compute_auto_weight(25) == 0.75
+    assert compute_auto_weight(35) == 0.85
+
+
+def test_calibrate_zero_matches_returns_base_regardless_of_weight():
+    # Pre-season or unplayed GW invariant
+    df = pd.DataFrame([{"Team": "ARS", "Goals": 1.972, "Goals Conceded": 0.875}])
+    fpl_stats = {"ARS": {"matches_played": 0, "goals_per_match": 0.0, "conceded_per_match": 0.0}}
+
+    config = CalibrationConfig(weight=0.70)
+    result = calibrate_team_strengths(df, fpl_stats, config=config)
+
+    assert result.iloc[0]["Goals"] == pytest.approx(1.972, abs=1e-3)
+    assert result.iloc[0]["Goals Conceded"] == pytest.approx(0.875, abs=1e-3)
+
+
+def test_calibrate_with_empirical_stats():
+    df = pd.DataFrame([{"Team": "MCI", "Goals": 2.000, "Goals Conceded": 1.000}])
+    fpl_stats = {
+        "MCI": {
+            "matches_played": 5,
+            "empirical_attack_per_match": 2.400,
+            "empirical_defense_per_match": 1.200,
+        }
+    }
+
+    # 50/50 blend: Goals = 0.5 * 2.0 + 0.5 * 2.4 = 2.2; Conceded = 0.5 * 1.0 + 0.5 * 1.2 = 1.1
+    config = CalibrationConfig(weight=0.50)
+    result = calibrate_team_strengths(df, fpl_stats, config=config)
+
+    assert result.iloc[0]["Goals"] == pytest.approx(2.200, abs=1e-3)
+    assert result.iloc[0]["Goals Conceded"] == pytest.approx(1.100, abs=1e-3)
+
+
+def test_calculate_home_advantage_factor_empty():
+    from solio_calibrate.calibrate import calculate_home_advantage_factor
+
+    # Empty fixtures returns Solio's 9.6% prior
+    h = calculate_home_advantage_factor([])
+    assert h == pytest.approx(0.096, abs=1e-4)
+
+
+def test_calculate_home_advantage_factor_with_matches():
+    from solio_calibrate.calibrate import calculate_home_advantage_factor
+
+    # Match where home attack is 1.644 and away attack is 1.356 (exact 9.6% advantage)
+    matches = [
+        {
+            "home_goals": 2,
+            "away_goals": 1,
+            "home_xg": 1.288,
+            "away_xg": 1.712,
+        }
+    ]
+    # Home G+xG = 3.288 / 2 = 1.644; Away G+xG = 2.712 / 2 = 1.356
+    h = calculate_home_advantage_factor(matches, pseudo_matches=0.0)
+    # (1.644 - 1.356) / (1.644 + 1.356) = 0.288 / 3.0 = 0.096
+    assert h == pytest.approx(0.096, abs=1e-4)
