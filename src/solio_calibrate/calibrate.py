@@ -35,20 +35,15 @@ class CalibrationConfig:
 def compute_auto_weight(max_finished_gw: int) -> float:
     """Compute recommended empirical blend weight based on season progress.
 
-    Invariant: If max_finished_gw <= 0 (pre-season or unplayed GW1), weight is 0.0 (100% Solio).
+    Decays linearly from 100% Solio baseline (weight=0.0) at pre-season (GW <= 0)
+    to 100% empirical season stats (weight=1.0) once half the season (GW19)
+    has finished. From GW20 onward, weight remains 1.0 (pure season stats).
     """
     if max_finished_gw <= 0:
         return 0.0
-    elif max_finished_gw <= 4:
-        return 0.30
-    elif max_finished_gw <= 8:
-        return 0.50
-    elif max_finished_gw <= 19:
-        return 0.65
-    elif max_finished_gw <= 29:
-        return 0.75
-    else:
-        return 0.85
+    if max_finished_gw >= 19:
+        return 1.0
+    return round(max_finished_gw / 19.0, 4)
 
 
 def calculate_home_advantage_factor(

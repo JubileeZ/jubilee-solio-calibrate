@@ -93,11 +93,11 @@ def test_compute_auto_weight_progression():
 
     assert compute_auto_weight(0) == 0.0  # Preseason / unplayed
     assert compute_auto_weight(-1) == 0.0
-    assert compute_auto_weight(3) == 0.30
-    assert compute_auto_weight(5) == 0.50
-    assert compute_auto_weight(15) == 0.65
-    assert compute_auto_weight(25) == 0.75
-    assert compute_auto_weight(35) == 0.85
+    assert compute_auto_weight(5) == pytest.approx(5 / 19.0, abs=1e-3)
+    assert compute_auto_weight(10) == pytest.approx(10 / 19.0, abs=1e-3)
+    assert compute_auto_weight(19) == 1.0
+    assert compute_auto_weight(20) == 1.0
+    assert compute_auto_weight(38) == 1.0
 
 
 def test_calibrate_zero_matches_returns_base_regardless_of_weight():
