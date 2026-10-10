@@ -133,7 +133,7 @@ def test_calibrate_with_empirical_stats():
 def test_calculate_home_advantage_factor_empty():
     from solio_calibrate.calibrate import calculate_home_advantage_factor
 
-    # Empty fixtures returns Solio's 9.6% prior
+    # The empirical calculation retains its neutral baseline when no matches are available.
     h = calculate_home_advantage_factor([])
     assert h == pytest.approx(0.096, abs=1e-4)
 
@@ -141,7 +141,7 @@ def test_calculate_home_advantage_factor_empty():
 def test_calculate_home_advantage_factor_with_matches():
     from solio_calibrate.calibrate import calculate_home_advantage_factor
 
-    # Match where home attack is 1.644 and away attack is 1.356 (exact 9.6% advantage)
+    # Match where home attack is 1.644 and away attack is 1.356.
     matches = [
         {
             "home_goals": 2,
@@ -152,5 +152,5 @@ def test_calculate_home_advantage_factor_with_matches():
     ]
     # Home G+xG = 3.288 / 2 = 1.644; Away G+xG = 2.712 / 2 = 1.356
     h = calculate_home_advantage_factor(matches, pseudo_matches=0.0)
-    # (1.644 - 1.356) / (1.644 + 1.356) = 0.288 / 3.0 = 0.096
+    # (1.644 - 1.356) / (1.644 + 1.356) = 0.288 / 3.0
     assert h == pytest.approx(0.096, abs=1e-4)

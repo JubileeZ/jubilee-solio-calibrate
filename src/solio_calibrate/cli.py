@@ -170,7 +170,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
     # Fetch empirical match records and compute Home Advantage Factor
     fpl_stats: dict[str, dict[str, Any]] = {}
     provisional_matches_summary: list[str] = []
-    home_factor = 0.096
+    home_factor = 0.0
     try:
         match_records = client.get_match_records(
             force_refresh=args.force_refresh,
@@ -234,7 +234,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
         return 1
 
     # Extract empirical home advantage factor
-    home_factor = 0.096
+    home_factor = 0.0
     for s in fpl_stats.values():
         if "home_factor" in s:
             home_factor = float(s["home_factor"])
@@ -246,7 +246,6 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
             "teams_calibrated": len(calibrated_df),
             "finished_gameweeks": max_gw,
             "home_factor_pct": round(home_factor * 100, 2),
-            "solio_default_home_factor_pct": 9.6,
             "blend_weight": round(effective_weight, 2),
             "provisional_matches": provisional_matches_summary,
         }
@@ -257,7 +256,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
         print(f"Calibrated CSV: {out_path.resolve()}")
         print(f"Teams Calibrated: {len(calibrated_df)}")
         print(f"Finished Gameweeks: {max_gw}")
-        print(f"Home Advantage Factor: {home_factor * 100:.2f}% (Solio default: 9.60%)")
+        print(f"Empirical Home Advantage Factor: {home_factor * 100:.2f}%")
         print(f"Effective Blend Weight: {effective_weight * 100:.1f}%")
         if provisional_matches_summary:
             print(
