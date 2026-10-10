@@ -1,0 +1,11 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environments & secrets
+.env
+.env.*
+!.env.example
+
+# Temporary test outputs
+tmp_azg*

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/run-hook.cmd block-destructive-ops",
+        "failClosed": true
+      },
+      {
+        "command": ".cursor/hooks/run-hook.cmd commit-verify",
+        "matcher": "git\\s+commit",
+        "failClosed": true
+      }
+    ]
+  }
+}

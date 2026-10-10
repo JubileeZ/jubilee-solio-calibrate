@@ -1,0 +1,25 @@
+{
+  "safety-gate": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/block-destructive-ops.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/commit-gate.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
