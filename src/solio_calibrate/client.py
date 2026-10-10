@@ -128,7 +128,7 @@ class FPLClient:
         finished_fixtures = [
             f
             for f in fixtures
-            if f.get("finished", False)
+            if (f.get("finished", False) or f.get("finished_provisional", False))
             and f.get("team_h_score") is not None
             and f.get("team_a_score") is not None
         ]
@@ -177,6 +177,10 @@ class FPLClient:
             h_xg = gw_team_xg.get(ev, {}).get(th_code, float(h_score))
             a_xg = gw_team_xg.get(ev, {}).get(ta_code, float(a_score))
 
+            is_provisional = bool(
+                f.get("finished_provisional", False) and not f.get("finished", False)
+            )
+
             records.append({
                 "fixture_id": f["id"],
                 "event": ev,
@@ -186,6 +190,7 @@ class FPLClient:
                 "away_goals": a_score,
                 "home_xg": h_xg,
                 "away_xg": a_xg,
+                "is_provisional": is_provisional,
             })
 
         return records
@@ -241,7 +246,7 @@ def calculate_team_actual_stats(
     """
     finished_fixtures = []
     for f in fixtures:
-        if not f.get("finished", False):
+        if not (f.get("finished", False) or f.get("finished_provisional", False)):
             continue
         if f.get("team_h_score") is None or f.get("team_a_score") is None:
             continue

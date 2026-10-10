@@ -71,3 +71,4 @@ def test_cli_json_output(tmp_path: Path, capsys):
     assert payload["calibrated_file"] == str(out_file.resolve())
     assert payload["teams_calibrated"] == 1
     assert "home_factor_pct" in payload
+    assert "provisional_matches" in payload

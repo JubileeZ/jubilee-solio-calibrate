@@ -191,3 +191,69 @@ def test_venue_neutralization_in_empirical_form():
     assert stats["ARS"]["raw_defense_per_match"] == pytest.approx(1.500, abs=1e-3)
     assert "home_factor" in stats["ARS"]
     assert stats["ARS"]["home_factor"] == pytest.approx(0.096, abs=1e-3)
+
+
+def test_calculate_team_actual_stats_with_provisional():
+    fixtures = [
+        {
+            "event": 1,
+            "finished": False,
+            "finished_provisional": True,
+            "team_h": 1,
+            "team_a": 6,
+            "team_h_score": 2,
+            "team_a_score": 1,
+        }
+    ]
+    stats = calculate_team_actual_stats(fixtures)
+    assert stats["ARS"]["matches_played"] == 1
+    assert stats["ARS"]["goals_scored"] == 2
+    assert stats["CHE"]["matches_played"] == 1
+    assert stats["CHE"]["goals_scored"] == 1
+
+
+def test_fpl_client_get_match_records_provisional(tmp_path: Path):
+    cache_dir = tmp_path / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    fake_bootstrap = {
+        "elements": [
+            {"id": 101, "team": 1},
+            {"id": 202, "team": 6},
+        ]
+    }
+    (cache_dir / "bootstrap_static.json").write_text(json.dumps(fake_bootstrap), encoding="utf-8")
+
+    fixtures = [
+        {
+            "id": 1,
+            "event": 1,
+            "finished": True,
+            "finished_provisional": False,
+            "team_h": 1,
+            "team_a": 6,
+            "team_h_score": 1,
+            "team_a_score": 0,
+        },
+        {
+            "id": 2,
+            "event": 2,
+            "finished": False,
+            "finished_provisional": True,
+            "team_h": 6,
+            "team_a": 1,
+            "team_h_score": 3,
+            "team_a_score": 2,
+        },
+    ]
+    (cache_dir / "fixtures.json").write_text(json.dumps(fixtures), encoding="utf-8")
+
+    client = FPLClient(cache_dir=cache_dir)
+    records = client.get_match_records(offline=True)
+
+    assert len(records) == 2
+    assert records[0]["fixture_id"] == 1
+    assert records[0]["is_provisional"] is False
+    assert records[1]["fixture_id"] == 2
+    assert records[1]["is_provisional"] is True
+

@@ -146,7 +146,8 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
         finished_gws = [
             f.get("event")
             for f in fixtures
-            if f.get("finished") and f.get("event") is not None
+            if (f.get("finished") or f.get("finished_provisional"))
+            and f.get("event") is not None
         ]
         if args.max_gameweek is not None:
             finished_gws = [gw for gw in finished_gws if gw <= args.max_gameweek]
@@ -168,6 +169,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
 
     # Fetch empirical match records and compute Home Advantage Factor
     fpl_stats: dict[str, dict[str, Any]] = {}
+    provisional_matches_summary: list[str] = []
     home_factor = 0.096
     try:
         match_records = client.get_match_records(
@@ -176,6 +178,11 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
             offline=args.offline,
         )
         if match_records:
+            provisional_records = [r for r in match_records if r.get("is_provisional")]
+            provisional_matches_summary = [
+                f"{r['home_team']} {r['home_goals']}-{r['away_goals']} {r['away_team']}"
+                for r in provisional_records
+            ]
             home_factor = calculate_home_advantage_factor(match_records)
             fpl_stats = calculate_team_empirical_form(
                 match_records,
@@ -241,6 +248,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
             "home_factor_pct": round(home_factor * 100, 2),
             "solio_default_home_factor_pct": 9.6,
             "blend_weight": round(effective_weight, 2),
+            "provisional_matches": provisional_matches_summary,
         }
         print(json.dumps(summary_payload, indent=2))
     else:
@@ -251,6 +259,11 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
         print(f"Finished Gameweeks: {max_gw}")
         print(f"Home Advantage Factor: {home_factor * 100:.2f}% (Solio default: 9.60%)")
         print(f"Effective Blend Weight: {effective_weight * 100:.1f}%")
+        if provisional_matches_summary:
+            print(
+                f"Provisional Matches: {len(provisional_matches_summary)} "
+                f"({', '.join(provisional_matches_summary)})"
+            )
         print("=" * 42 + "\n")
 
     return 0
