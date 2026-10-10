@@ -18,7 +18,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Team Mapping | `src/solio_calibrate/mapping.py` | Bidirectional 20-team Solio codes <-> FPL IDs |
 | Solio CSV I/O | `src/solio_calibrate/io.py` | Schema validator and 3-decimal CSV reader/writer |
 | FPL API Client | `src/solio_calibrate/client.py` | Caching API client, fixtures, live event element xG aggregator |
-| Calibration Engine | `src/solio_calibrate/calibrate.py` | Match-level xG/xGC, leave-one-out Bayesian normalization, auto-weight |
+| Calibration Engine | `src/solio_calibrate/calibrate.py` | Match-level xG/xGC, leave-one-out Bayesian normalization, GW1-19 linear decay auto-weight |
 | CLI Runner | `src/solio_calibrate/cli.py` | CLI executable with `--auto-weight`, `--weight 0.50`, custom input |
 | Sample Output | `data/output/team_strengths_calibrated.csv` | Calibrated Solio CSV export matching exact 3-decimal schema |
 | Agent Skill | `.agents/skills/calibrate-team-strength/SKILL.md` | Skill specification with empirical calibration and Home Factor CLI options |
