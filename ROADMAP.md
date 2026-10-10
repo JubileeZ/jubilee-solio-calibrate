@@ -8,77 +8,61 @@ This roadmap tracks the development progress, target architecture, and phases fo
 
 ## Personas
 
-<!-- AGENT: Define the primary user and developer personas.
-     Identify who they are, their goals, and their primary interface surface.
-     Example:
-     | Persona | Goal | Primary surface |
-     |---------|------|-----------------|
-     | **User** | Query API and view dashboard | Web UI |
--->
+| Persona | Goal | Primary surface |
+|---------|------|-----------------|
+| **FPL Manager** | Calibrate Solio team strengths and export upload-ready CSV | CLI / Agent skill |
+| **Developer** | Maintain FPL client, calibration heuristics, and test suite | Python / Pytest |
 
 ---
 
-## Current Project Status: **Phase 1 (Foundations)**
-
-<!-- AGENT: Update the active phase and customize the diagram/phases below. -->
+## Current Project Status: **Complete (All Phases Delivered)**
 
 ```mermaid
 flowchart TD
-    P1["Phase 1: Foundations ⏳"] --> P2["Phase 2: Core Implementation"]
-    P2 --> P3["Phase 3: Integration & Testing"]
-    P3 --> P4["Phase 4: Deployment"]
+    P1["Phase 1: Foundations & Environment ✓"] --> P2["Phase 2: FPL Client & Data Mapping ✓"]
+    P2 --> P3["Phase 3: Calibration Engine & CLI ✓"]
+    P3 --> P4["Phase 4: Agent Skill & Delivery ✓"]
 
-    style P1 fill:#1a365d,stroke:#2b6cb0,stroke-width:2px,color:#fff
-    style P2 fill:#2d3748,stroke:#4a5568,stroke-width:1px,color:#a0aec0
-    style P3 fill:#2d3748,stroke:#4a5568,stroke-width:1px,color:#a0aec0
-    style P4 fill:#2d3748,stroke:#4a5568,stroke-width:1px,color:#a0aec0
+    style P1 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
+    style P2 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
+    style P3 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
+    style P4 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
 ```
 
 ---
 
 ## Implementation Phases
 
-### ⏳ Phase 1: Repo Infrastructure & Foundations (Active)
+### ⏳ Phase 1: Repo Infrastructure & Foundations (Done)
 
-<!-- AGENT: List the foundations for Phase 1.
-     Example:
-     - [ ] Initialize repository structure and configuration.
-     - [ ] Setup testing and linting tools.
--->
-- [ ] 
+- [x] Initialize Python package config (`pyproject.toml`) with uv, httpx, pandas, pytest, and ruff.
+- [x] Wire delivery gate project test command (`tests/project-tests.sh` or `.azg/project-test-cmd`).
+- [x] Scaffold folder layout: `src/solio_calibrate/`, `data/`, `tests/`, `.agents/skills/solio-calibrate/`.
+- [x] Add raw example data from Solio export to `data/raw/team_strengths.csv`.
 
 ---
 
-### 📋 Phase 2: Core Implementation (Planned)
+### ⏳ Phase 2: FPL API Client & Data Mapping (Done)
 
-<!-- AGENT: List the core features for Phase 2.
-     Example:
-     - [ ] Core business logic and data structures.
-     - [ ] Basic unit and integration tests.
--->
-- [ ] 
+- [x] Implement bidirectional team code mapping (`ARS`, `MCI`, etc.) to FPL IDs.
+- [x] Implement FPL API client for `bootstrap-static` and fixture data with local JSON caching.
+- [x] Implement Solio CSV schema loader and validator (`Team,Goals,Goals Conceded`).
 
 ---
 
-### 📋 Phase 3: Integration & Testing (Planned)
+### ⏳ Phase 3: Calibration Engine & CLI (Done)
 
-<!-- AGENT: List the integration targets for Phase 3.
-     Example:
-     - [ ] Integration with external services or databases.
-     - [ ] System and end-to-end verification.
--->
-- [ ] 
+- [x] Implement pure calibration mathematical adjustment logic (form, fixture difficulty, user multipliers).
+- [x] Implement CLI tool (`solio-calibrate`) with arguments for input file, output file, and adjustment parameters.
+- [x] Add unit test suite for mapping, CSV I/O round-tripping, and calibration math.
 
 ---
 
-### 📋 Phase 4: Deployment & Release (Planned)
+### ⏳ Phase 4: Agent Skill & Delivery (Done)
 
-<!-- AGENT: List deployment and release steps for Phase 4.
-     Example:
-     - [ ] Build and release pipeline.
-     - [ ] Production hosting setup and verification.
--->
-- [ ] 
+- [x] Author agent skill `skills/solio-calibrate/SKILL.md` for interactive execution.
+- [x] End-to-end calibration run and sample output verification in Solio-compatible format.
+- [x] Run full project gate `bash tests/verify.sh`. 
 
 ---
 

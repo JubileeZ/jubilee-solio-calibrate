@@ -3,24 +3,24 @@
 
 ## Project Identity
 
-<!-- AGENT: 2–3 sentences. What does this repo do and why does it exist?
-     Include the primary user, the core problem it solves, and the output it produces.
-     Example: "Order management API for an e-commerce platform. Handles cart, checkout,
-     and fulfillment state. Consumed by web and mobile frontends via REST." -->
+Adjust and calibrate Solio team attack and defense strengths (`Goals`, `Goals Conceded`) using official FPL API stats and user preferences. Reads original Solio team strength CSV export, fetches current team performance from FPL API, computes calibrated adjustments, and outputs matched CSV for re-uploading to Solio web planner. Provides CLI tool and agent skill.
 
-**Stack:** <!-- AGENT: list primary language, runtime version, key frameworks, and package manager.
-              Example: Python 3.12 · uv · FastAPI · PostgreSQL · SQLAlchemy · pytest -->
+**Stack:** Python 3.12 · uv · httpx · pandas · pytest
 
 ---
 
 ## Repo Structure
 
-<!-- AGENT: One line per path that matters for navigation or boundaries.
-     No recursive dumps. If a package needs its own rules, use nested AGENTS.md
-     there instead of bloating this map. Remove section if none. -->
-
 ```
-<repo structure here>
+├── .agents/skills/solio-calibrate/ # Agent skill to execute calibrations
+├── data/                           # Solio raw input CSVs and calibrated outputs
+├── docs/agents/                    # Continuity, roadmap, issue tracking
+├── src/solio_calibrate/            # Calibration core package
+│   ├── client.py                   # FPL API fetching & caching
+│   ├── calibrate.py                # Strength adjustment logic
+│   └── cli.py                      # CLI runner
+├── tests/                          # Verify gate and test suite
+└── pyproject.toml                  # uv packaging and dependencies
 ```
 
 ---
@@ -30,8 +30,9 @@
 | Command | What it does |
 |---------|-------------|
 | `bash tests/verify.sh` | Portable delivery gate (harness + project validation) |
-| (add your lint command here) | Lint |
-| (add your test command here) | Test |
+| `uv run ruff check .` | Lint codebase |
+| `uv run pytest` | Run test suite |
+| `uv run solio-calibrate` | Execute calibration CLI |
 
 **Commit readiness:** run each applicable command listed above and confirm it passes before proposing a commit. `tests/verify.sh` is the minimum portable gate.
 
@@ -42,15 +43,16 @@
 ## Safety Rules
 
 - Never commit, print, or paste secret values (from `.env`, credentials, tokens, or chat). App code may read env vars; do not exfiltrate their values.
-<!-- AGENT: Add repository-specific safety constraints below (migrations, prod config, data stores, etc.).
-     Remove this comment when done. -->
+- Preserve exact Solio team strength CSV schema (`Team,Goals,Goals Conceded`) and 3-decimal formatting on export for web upload compatibility.
+- Never overwrite original raw input CSVs in place; write outputs to designated output directory or distinct filenames.
 
 ---
 
 ## Code Conventions
 
-<!-- AGENT: Add only non-obvious conventions not already enforced by tools or canonical code.
-     Remove this section if none. -->
+- Enforce standard Solio 3-letter team codes (`ARS`, `AVL`, `MCI`, etc.) with explicit bidirectional mapping to FPL team IDs and names.
+- Keep calibration adjustment logic as pure, deterministic functions decoupled from HTTP and filesystem I/O.
+- Quantize all calibrated float values (`Goals`, `Goals Conceded`) to 3 decimal places on output.
 
 ---
 

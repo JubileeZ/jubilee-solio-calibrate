@@ -9,3 +9,11 @@ Thumbs.db
 
 # Temporary test outputs
 tmp_azg*
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.pytest_cache/
+data/cache/
