@@ -56,3 +56,7 @@ When invoking this skill, parse the output and report directly in the response:
 2. **Home Advantage Factor**: Clearly state the single empirical Home Advantage Factor % (e.g. `8.32%`) and instruct the user to configure this parameter in the Solio web planner. Note the contrast with Solio's default betting prior ($9.6\%$).
 3. **Venue Neutrality Confirmation**: Note that the generated table values are venue-neutral, allowing Solio's planner to apply the home factor on top without double-counting.
 4. **Summary Table**: Display a concise Markdown comparison of original vs calibrated Goals and Goals Conceded for key teams.
+5. **Provisional Matches Highlight**: If any matches were included provisionally (`provisional_matches` in JSON
+  summary, e.g. games that just finished on the pitch before official FPL bonus lock), explicitly highlight them to
+  the user in the response chat dialogue (e.g. fixture and scoreline). Confirm that the output CSV retains the clean
+  Solio format (`Team,Goals,Goals Conceded`) without extra metadata.
