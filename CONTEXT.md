@@ -31,3 +31,21 @@ _Avoid_: Adjusted rating, final score, output strength.
 **Home Advantage Factor**:
 The single league-wide percentage adjustment $h$ applied symmetrically to team expected goals based on venue ($\text{Home} = \text{Goals} \times (1 + h)$, $\text{Away} = \text{Goals} \times (1 - h)$). The empirical value is derived from season-to-date Premier League fixture outcomes. Solio's configured default may change, so do not assume or report a fixed default value.
 _Avoid_: Home bias, venue split, home handicap.
+
+**Active Base Strength**:
+The currently active uncalibrated Solio export residing at `data/raw/team_strengths_base.csv`, serving as the default prior baseline for calibration.
+_Avoid_: Default raw file, current raw input, source file.
+
+**Raw Input Archive**:
+Chronologically archived historical base strength CSV exports stored under `data/raw/archive/` using timestamped filenames (`team_strengths_base_YYYY-MM-DD_HH-MM-SS.csv`).
+_Avoid_: Raw backup, raw subrepo, old inputs.
+
+**Latest Calibrated Output**:
+The most recently computed calibrated ratings written to `data/output/team_strengths_calibrated.csv`, formatted strictly to 3 decimal places and ready for direct upload to the Solio web planner.
+_Avoid_: Latest strength, current output file, active export.
+
+**Calibrated Output Archive**:
+Chronologically archived historical calibrated CSV exports stored under `data/output/archive/` using timestamped filenames (`team_strengths_calibrated_YYYY-MM-DD_HH-MM-SS.csv`).
+_Avoid_: Output backup, output subrepo, run history folder.
+
+

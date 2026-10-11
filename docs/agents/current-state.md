@@ -14,13 +14,13 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Agent Config | `AGENTS.md` | Calibrate project identity, commands, safety |
 | Roadmap | `ROADMAP.md` | 4-phase plan; all phases complete |
 | Python Package | `pyproject.toml`, `uv.lock`, `.venv/` | uv environment with httpx, pandas, pytest, ruff |
-| Raw Data | `data/raw/team_strengths.csv` | Example Solio team strength CSV export |
+| Raw Data | `data/raw/team_strengths_base.csv`, `data/raw/archive/` | Active base strength Solio export; historical inputs archived chronologically |
 | Team Mapping | `src/solio_calibrate/mapping.py` | Bidirectional 20-team Solio codes <-> FPL IDs |
-| Solio CSV I/O | `src/solio_calibrate/io.py` | Schema validator and 3-decimal CSV reader/writer |
+| Solio CSV I/O | `src/solio_calibrate/io.py` | Schema validator and 3-decimal CSV reader/writer with deduplicated raw ingestion and output archiving |
 | FPL API Client | `src/solio_calibrate/client.py` | Caching API client, fixtures (including provisional), live event element xG aggregator |
 | Calibration Engine | `src/solio_calibrate/calibrate.py` | Match-level xG/xGC, leave-one-out Bayesian normalization, GW1-19 linear decay auto-weight |
-| CLI Runner | `src/solio_calibrate/cli.py` | CLI executable with `--auto-weight`, provisional match reporting, custom input |
-| Sample Output | `data/output/team_strengths_calibrated.csv` | Calibrated Solio CSV export matching exact 3-decimal schema |
+| CLI Runner | `src/solio_calibrate/cli.py` | CLI executable with `--auto-weight`, provisional match reporting, raw ingestion, and output archiving |
+| Calibrated Output | `data/output/team_strengths_calibrated.csv`, `data/output/archive/` | Latest calibrated Solio export (3-decimal schema); historical runs archived with ISO timestamps |
 | Agent Skill | `.agents/skills/calibrate-team-strength/SKILL.md` | Skill specification with empirical calibration and Home Factor CLI options |
 | Architecture Decision | `docs/adr/0001-fpl-empirical-strength-normalization.md` | ADR for empirical normalization, shrinkage, zero-GW fallback |
 
@@ -47,7 +47,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 
 ## Agent pitfalls
 
-- Never overwrite original raw Solio CSV in `data/raw/`. Write to `data/` output paths or timestamps.
+- Never save calibrated output into `data/raw/`. Write to `data/output/team_strengths_calibrated.csv` and `data/output/archive/`.
 - Ensure output CSV maintains exact 3-decimal float precision and header format `Team,Goals,Goals Conceded`.
 
 ---

@@ -43,8 +43,7 @@ Adjust and calibrate Solio team attack and defense strengths (`Goals`, `Goals Co
 ## Safety Rules
 
 - Never commit, print, or paste secret values (from `.env`, credentials, tokens, or chat). App code may read env vars; do not exfiltrate their values.
-- Preserve exact Solio team strength CSV schema (`Team,Goals,Goals Conceded`) and 3-decimal formatting on export for web upload compatibility.
-- Never overwrite original raw input CSVs in place; write outputs to designated output directory or distinct filenames.
+- Never save calibrated outputs into `data/raw/`; write outputs to `data/output/` with archive snapshots in `data/output/archive/`. Always archive prior base strength to `data/raw/archive/` before updating `data/raw/team_strengths_base.csv`.
 
 ---
 

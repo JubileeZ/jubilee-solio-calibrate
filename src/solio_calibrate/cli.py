@@ -16,7 +16,12 @@ from solio_calibrate.calibrate import (
     compute_auto_weight,
 )
 from solio_calibrate.client import FPLClient
-from solio_calibrate.io import load_solio_team_strengths, save_solio_team_strengths
+from solio_calibrate.io import (
+    CANONICAL_BASE_FILENAME,
+    ingest_and_archive_raw_input,
+    load_solio_team_strengths,
+    save_and_archive_calibrated_strengths,
+)
 
 logger = logging.getLogger("solio_calibrate")
 
@@ -30,15 +35,37 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "-i",
         "--input",
         type=Path,
-        default=Path("data/raw/team_strengths.csv"),
-        help="Path to original Solio team strengths CSV (default: data/raw/team_strengths.csv)",
+        default=None,
+        help="Path to original Solio team strengths CSV (default: data/raw/team_strengths_base.csv)",
     )
     parser.add_argument(
         "-o",
         "--output",
         type=Path,
-        default=Path("data/output/team_strengths_calibrated.csv"),
-        help="Path to output calibrated CSV (default: data/output/team_strengths_calibrated.csv)",
+        default=None,
+        help="Override output CSV path (default: data/output/team_strengths_calibrated.csv with archive copy)",
+    )
+    parser.add_argument(
+        "--raw-dir",
+        type=Path,
+        default=Path("data/raw"),
+        help="Root directory for base strength CSV and archive (default: data/raw)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("data/output"),
+        help="Root directory for calibrated strength CSV and archive (default: data/output)",
+    )
+    parser.add_argument(
+        "--no-ingest",
+        action="store_true",
+        help="Do not ingest/archive raw input into data/raw/team_strengths_base.csv",
+    )
+    parser.add_argument(
+        "--ingest-raw",
+        action="store_true",
+        help="Force ingesting and archiving raw input into data/raw/ even if --output is specified",
     )
     parser.add_argument(
         "-w",
@@ -116,7 +143,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Output machine-readable JSON summary to stdout",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    args.input_explicit = args.input is not None
+    if args.input is None:
+        default_candidate = args.raw_dir / CANONICAL_BASE_FILENAME
+        if not default_candidate.exists() and (args.raw_dir / "team_strengths.csv").exists():
+            args.input = args.raw_dir / "team_strengths.csv"
+        else:
+            args.input = default_candidate
+    return args
 
 
 def main_cli(argv: Sequence[str] | None = None) -> int:
@@ -125,10 +160,27 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
+    # Handle raw input ingestion and archiving
+    should_ingest = args.ingest_raw or (
+        args.input_explicit and args.output is None and not args.no_ingest
+    )
+    input_to_load = args.input
+    if should_ingest:
+        try:
+            input_to_load, archived_raw = ingest_and_archive_raw_input(
+                args.input, raw_dir=args.raw_dir
+            )
+            logger.info(f"Ingested raw input to active base strength: {input_to_load}")
+            if archived_raw:
+                logger.info(f"Archived previous base strength to: {archived_raw}")
+        except (OSError, ValueError) as e:
+            logger.error(f"Failed to ingest raw input CSV: {e}")
+            return 1
+
     # Load input Solio CSV
-    logger.info(f"Loading Solio input from {args.input}...")
+    logger.info(f"Loading Solio input from {input_to_load}...")
     try:
-        base_df = load_solio_team_strengths(args.input)
+        base_df = load_solio_team_strengths(input_to_load)
     except (OSError, ValueError, KeyError) as e:
         logger.error(f"Failed to load input CSV: {e}")
         return 1
@@ -227,8 +279,14 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
 
     # Save output
     try:
-        out_path = save_solio_team_strengths(calibrated_df, args.output)
+        out_path, archived_path = save_and_archive_calibrated_strengths(
+            calibrated_df,
+            output_path=args.output,
+            output_dir=args.output_dir,
+        )
         logger.info(f"Successfully wrote calibrated Solio CSV to: {out_path}")
+        if archived_path:
+            logger.info(f"Archived calibrated Solio CSV to: {archived_path}")
     except (PermissionError, ValueError, OSError) as e:
         logger.error(f"Failed to save output CSV: {e}")
         return 1
@@ -243,6 +301,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
     if args.json:
         summary_payload = {
             "calibrated_file": str(out_path.resolve()),
+            "archived_file": str(archived_path.resolve()) if archived_path else None,
             "teams_calibrated": len(calibrated_df),
             "finished_gameweeks": max_gw,
             "home_factor_pct": round(home_factor * 100, 2),
@@ -254,6 +313,8 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
         print("\n" + "=" * 42)
         print("=== Solio Calibration Summary ===")
         print(f"Calibrated CSV: {out_path.resolve()}")
+        if archived_path:
+            print(f"Archived CSV: {archived_path.resolve()}")
         print(f"Teams Calibrated: {len(calibrated_df)}")
         print(f"Finished Gameweeks: {max_gw}")
         print(f"Empirical Home Advantage Factor: {home_factor * 100:.2f}%")

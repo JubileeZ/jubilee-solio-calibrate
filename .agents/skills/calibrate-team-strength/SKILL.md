@@ -21,7 +21,6 @@ Run the calibration engine CLI:
 ```bash
 uv run solio-calibrate \
   --input "/path/to/team_strengths.csv" \
-  --output data/output/team_strengths_calibrated.csv \
   --weight 0.50 \
   --json
 ```
@@ -39,8 +38,10 @@ uv run solio-calibrate \
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-i, --input` | `data/raw/team_strengths.csv` | Path to original Solio team strength CSV export |
-| `-o, --output` | `data/output/team_strengths_calibrated.csv` | Destination path for calibrated CSV |
+| `-i, --input` | `data/raw/team_strengths_base.csv` | Path to original Solio team strength CSV export (automatically archived to `data/raw/archive/` and promoted to active base strength if a new file is supplied) |
+| `-o, --output` | `data/output/team_strengths_calibrated.csv` | Destination path for calibrated CSV; defaults to canonical latest output while archiving each run to `data/output/archive/team_strengths_calibrated_YYYY-MM-DD_HH-MM-SS.csv` |
+| `--no-ingest` | `false` | Do not promote or archive new input into `data/raw/team_strengths_base.csv` |
+| `--ingest-raw` | `false` | Force promoting and archiving input into `data/raw/` even if `--output` is specified |
 | `-w, --weight` | `0.50` | Blend weight [0.0–1.0] for FPL empirical form vs Solio base |
 | `--auto-weight` | `false` | Dynamically scale weight based on completed gameweeks (0.0 if unplayed) |
 | `--max-gameweek` | `None` | Upper bound gameweek to include |
