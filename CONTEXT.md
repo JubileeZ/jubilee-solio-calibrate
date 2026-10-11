@@ -48,4 +48,12 @@ _Avoid_: Latest strength, current output file, active export.
 Chronologically archived historical calibrated CSV exports stored under `data/output/archive/` using timestamped filenames (`team_strengths_calibrated_YYYY-MM-DD_HH-MM-SS.csv`).
 _Avoid_: Output backup, output subrepo, run history folder.
 
+**Provisional Match**:
+A Premier League match where the final whistle has blown and live statistics (goals, xG) are recorded by the FPL API, but bonus points or official data audits have not yet finalized (`finished_provisional = true`, `finished = false`).
+_Avoid_: Live match, in-progress game, tentative fixture.
+
+**Gameweek Coverage**:
+The numerical range of Premier League rounds incorporated into a calibration run, identified by the highest completed gameweek plus any provisionally finished matches in the current gameweek.
+_Avoid_: Round window, matchweek span, GW count.
+
 
