@@ -138,3 +138,13 @@ def test_save_and_archive_calibrated_strengths(tmp_path: Path):
     assert arch_override is None
     assert custom_target.is_file()
 
+    # 3. Saving identical data a second time suppresses duplicate archive
+    ts2 = datetime(2026, 10, 11, 13, 5, 0, tzinfo=UTC)
+    out_file2, arch_file2 = save_and_archive_calibrated_strengths(
+        df, output_path=None, output_dir=output_dir, now=ts2
+    )
+    assert out_file2 == out_file
+    assert arch_file2 is None
+    archives = list((output_dir / "archive").glob("*.csv"))
+    assert len(archives) == 1
+

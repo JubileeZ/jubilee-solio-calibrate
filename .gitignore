@@ -17,3 +17,7 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 data/cache/
+.cache/
+**/__pycache__/
+**/.cache/
+vendor/open-fpl-solver/data/*.csv

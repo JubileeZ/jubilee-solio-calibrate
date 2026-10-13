@@ -1,6 +1,6 @@
 """I/O routines for reading and writing Solio team strength CSVs."""
 
-import filecmp
+import hashlib
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +12,25 @@ from solio_calibrate.mapping import SOLIO_TEAMS
 REQUIRED_COLUMNS = ["Team", "Goals", "Goals Conceded"]
 CANONICAL_BASE_FILENAME = "team_strengths_base.csv"
 CANONICAL_CALIBRATED_FILENAME = "team_strengths_calibrated.csv"
+
+
+def calculate_file_sha256(file_path: str | Path) -> str:
+    """Calculate the SHA256 hex digest of a file.
+
+    Args:
+        file_path: Target file path.
+
+    Returns:
+        Hexadecimal SHA256 string.
+    """
+    path = Path(file_path)
+    if not path.is_file():
+        raise FileNotFoundError(f"File not found for hash calculation: {path}")
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def format_archive_filename(prefix: str = "team_strengths", timestamp: datetime | None = None) -> str:
@@ -130,10 +149,15 @@ def ingest_and_archive_raw_input(
         return target_active, None
 
     archived_path: Path | None = None
-    if target_active.exists() and not filecmp.cmp(src, target_active, shallow=False):
-        archive_dir.mkdir(parents=True, exist_ok=True)
-        archived_path = archive_dir / format_archive_filename("team_strengths_base", now)
-        shutil.copy2(target_active, archived_path)
+    if target_active.exists():
+        src_hash = calculate_file_sha256(src)
+        active_hash = calculate_file_sha256(target_active)
+        if src_hash != active_hash:
+            archive_dir.mkdir(parents=True, exist_ok=True)
+            existing_archives = sorted(archive_dir.glob("team_strengths_base_*.csv"))
+            if not existing_archives or calculate_file_sha256(existing_archives[-1]) != active_hash:
+                archived_path = archive_dir / format_archive_filename("team_strengths_base", now)
+                shutil.copy2(target_active, archived_path)
 
     shutil.copy2(src, target_active)
     return target_active, archived_path
@@ -146,6 +170,9 @@ def save_and_archive_calibrated_strengths(
     now: datetime | None = None,
 ) -> tuple[Path, Path | None]:
     """Save calibrated strengths. If output_path is None, saves to canonical path and archives copy.
+
+    Deduplicates against the latest archived file: if the newly calibrated content
+    matches the most recent archived snapshot, creating a redundant archive is suppressed.
 
     Args:
         df: DataFrame with ['Team', 'Goals', 'Goals Conceded'].
@@ -168,6 +195,14 @@ def save_and_archive_calibrated_strengths(
     written = save_solio_team_strengths(df, canonical_path)
 
     archive_dir.mkdir(parents=True, exist_ok=True)
+    existing_archives = sorted(archive_dir.glob("team_strengths_calibrated_*.csv"))
+    written_hash = calculate_file_sha256(written)
+
+    if existing_archives:
+        latest_archive = existing_archives[-1]
+        if calculate_file_sha256(latest_archive) == written_hash:
+            return written, None
+
     archived_path = archive_dir / format_archive_filename("team_strengths_calibrated", now)
     shutil.copy2(written, archived_path)
 
