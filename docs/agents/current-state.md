@@ -23,13 +23,6 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Calibrated Output | `data/output/team_strengths_calibrated.csv`, `data/output/archive/` | Latest calibrated Solio export (3-decimal schema); historical runs archived with ISO timestamps |
 | Agent Skill | `.agents/skills/calibrate-team-strength/SKILL.md` | Skill spec with default force-refresh, GW coverage, provisional matches, 20-team template, default commit-push |
 | Architecture Decision | `docs/adr/0001-fpl-empirical-strength-normalization.md` | ADR for empirical normalization, shrinkage, zero-GW fallback |
-| Solver Vendor & Sync | `vendor/open-fpl-solver/`, `scripts/sync-solver.sh` | Vendored open-fpl-solver (HiGHS MILP) with one-click upstream sync script |
-| Projections I/O | `src/solio_calibrate/projections.py` | Solio player projections schema loader, validator, and SHA256 deduplicated archiver |
-| Solver Adapter | `src/solio_calibrate/solver/` | HiGHS solver adapter with chip horizon auto-expansion, pre-solve summary, and FPL.Team link generator |
-| Solver CLI | `src/solio_calibrate/solve_cli.py` | `solio-solve` CLI runner with confirmation prompt, chip scheduling, and CSV export |
-| Projections Data | `data/projections/solio_projections.csv`, `data/projections/archive/` | Active Solio player projections and SHA256 deduplicated historical archives |
-| Solver Skill | `.agents/skills/solve-squad/SKILL.md` | Agent skill for multi-period squad optimization and FPL.Team planner links |
-| Architecture Decision | `docs/adr/0002-vendor-open-fpl-solver-adapter.md` | ADR for in-tree vendoring, adapter architecture, SHA256 deduplication |
 
 ---
 
@@ -49,8 +42,6 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | `uv run pytest` | Run test suite |
 | `uv run ruff check .` | Lint codebase |
 | `uv run solio-calibrate` | Execute calibration CLI |
-| `uv run solio-solve` | Execute squad optimization solver CLI |
-| `bash scripts/sync-solver.sh` | Sync vendored open-fpl-solver from upstream |
 
 ---
 

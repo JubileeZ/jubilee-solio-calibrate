@@ -45,7 +45,7 @@ Adjust and calibrate Solio team attack and defense strengths (`Goals`, `Goals Co
 - Never commit, print, or paste secret values (from `.env`, credentials, tokens, or chat). App code may read env vars; do not exfiltrate their values.
 - Never save calibrated outputs into `data/raw/`; write outputs to `data/output/` with archive snapshots in `data/output/archive/`. Always archive prior base strength to `data/raw/archive/` before updating `data/raw/team_strengths_base.csv`.
 - Calibration delivery: requesting team strength calibration (`calibrate-team-strength`) authorizes full publish cycle by default: run `tests/verify.sh`, stage and commit output/archive files, push `origin/main`.
-- Deduplicate archives: verify SHA256 content before creating archive snapshots for raw base strengths, calibrated outputs, and player projections. Suppress duplicate timestamped files when content is identical.
+- Deduplicate archives: verify SHA256 content before creating archive snapshots for raw base strengths and calibrated outputs. Suppress duplicate timestamped files when content is identical.
 
 ---
 

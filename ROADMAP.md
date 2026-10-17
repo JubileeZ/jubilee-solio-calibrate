@@ -22,13 +22,11 @@ flowchart TD
     P1["Phase 1: Foundations & Environment ✓"] --> P2["Phase 2: FPL Client & Data Mapping ✓"]
     P2 --> P3["Phase 3: Calibration Engine & CLI ✓"]
     P3 --> P4["Phase 4: Agent Skill & Delivery ✓"]
-    P4 --> P5["Phase 5: Squad Solver Integration ✓"]
 
     style P1 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
     style P2 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
     style P3 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
     style P4 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
-    style P5 fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff
 ```
 
 ---
@@ -65,19 +63,6 @@ flowchart TD
 - [x] Author agent skill `.agents/skills/calibrate-team-strength/SKILL.md` for interactive execution.
 - [x] End-to-end calibration run and sample output verification in Solio-compatible format.
 - [x] Run full project gate `bash tests/verify.sh`. 
-
----
-
-### ⏳ Phase 5: Squad Solver Integration (Done)
-
-- [x] Vendor `open-fpl-solver` under `vendor/open-fpl-solver/` with sync script `scripts/sync-solver.sh`.
-- [x] Implement Solio player projections schema loader, validator, and SHA256 deduplicated archiver (`src/solio_calibrate/projections.py`).
-- [x] Author HiGHS MILP solver adapter with chip horizon auto-expansion, pre-solve summary, and FPL.Team URL generator (`src/solio_calibrate/solver/`).
-- [x] Implement CLI command `solio-solve` with interactive confirmation and chip options (`src/solio_calibrate/solve_cli.py`).
-- [x] Author dedicated agent skill `.agents/skills/solve-squad/SKILL.md`.
-- [x] Record ADR 0002 for vendoring and adapter architecture (`docs/adr/0002-vendor-open-fpl-solver-adapter.md`).
-- [x] Enforce SHA256 deduplication across raw base strengths, calibrated outputs, and player projections, cleaning up redundant historical archives.
-- [x] Pass all unit tests and delivery gate (`bash tests/verify.sh`).
 
 ---
 

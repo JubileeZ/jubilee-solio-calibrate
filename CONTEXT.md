@@ -55,21 +55,3 @@ _Avoid_: Live match, in-progress game, tentative fixture.
 **Gameweek Coverage**:
 The numerical range of Premier League rounds incorporated into a calibration run, identified by the highest completed gameweek plus any provisionally finished matches in the current gameweek.
 _Avoid_: Round window, matchweek span, GW count.
-
-**Player Projection**:
-Multi-gameweek expected minutes (`_xMins`) and expected points (`_Pts`) per player exported from the Solio web planner after calibrated team strengths are applied.
-_Avoid_: Player prediction, raw points, solver input csv.
-
-**Multi-Period Solve**:
-An integer linear programming optimization (via HiGHS) maximizing cumulative projected points over a planning horizon subject to FPL squad, budget, transfer, and chip rules.
-_Avoid_: Squad optimization run, lineup calculate, team solver.
-
-**Manager Team State**:
-The active 15-player squad, bank balance, available chips, and accumulated free transfers for an FPL entry.
-_Avoid_: User picks, current team json, manager profile.
-
-**Transfer Plan**:
-The optimal gameweek-by-gameweek schedule of transfers, starting eleven, captaincy, and bench order.
-_Avoid_: Solution route, move list, solver schedule.
-
-

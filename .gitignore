@@ -20,4 +20,3 @@ data/cache/
 .cache/
 **/__pycache__/
 **/.cache/
-vendor/open-fpl-solver/data/*.csv
