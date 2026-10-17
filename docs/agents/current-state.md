@@ -11,7 +11,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Area | Path | Notes |
 |------|------|-------|
 | Harness & Gate | `tests/verify.sh`, `tests/project-tests.sh`, `.agents/` | Alpha-Zero-G v4 harness and verify gate |
-| Agent Config | `AGENTS.md` | Calibrate project identity, commands, safety |
+| Agent Config | `AGENTS.md` | Calibrate project identity, boundaries, commands, safety |
 | Roadmap | `ROADMAP.md` | 4-phase plan; all phases complete |
 | Python Package | `pyproject.toml`, `uv.lock`, `.venv/` | uv environment with httpx, pandas, pytest, ruff |
 | Raw Data | `data/raw/team_strengths_base.csv`, `data/raw/archive/` | Active base strength Solio export; historical inputs archived chronologically |
@@ -23,6 +23,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Calibrated Output | `data/output/team_strengths_calibrated.csv`, `data/output/archive/` | Latest calibrated Solio export (3-decimal schema); historical runs archived with ISO timestamps |
 | Agent Skill | `.agents/skills/calibrate-team-strength/SKILL.md` | Skill spec with default force-refresh, GW coverage, provisional matches, 20-team template, default commit-push |
 | Architecture Decision | `docs/adr/0001-fpl-empirical-strength-normalization.md` | ADR for empirical normalization, shrinkage, zero-GW fallback |
+| Architecture Decision | `docs/adr/0002-scope-boundary-calibration-vs-squad-solver.md` | ADR for strict calibration scope and boundary vs sibling squad solver |
 
 ---
 
@@ -30,6 +31,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 
 | Item | Planned phase | Notes |
 |------|---------------|-------|
+| Squad Optimization / Solver | Out of scope | Strictly owned by sibling repo `fpl-jubilee-ascent` (`transfer-planner`) |
 | Web UI / Frontend | Future | CLI and skill workflows only |
 
 ---
@@ -49,6 +51,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 
 - Never save calibrated output into `data/raw/`. Write to `data/output/team_strengths_calibrated.csv` and `data/output/archive/`.
 - Ensure output CSV maintains exact 3-decimal float precision and header format `Team,Goals,Goals Conceded`.
+- Never implement squad optimization, player projections, or vendored MILP solvers in this repository; transfer planning belongs strictly to `fpl-jubilee-ascent`.
 
 ---
 

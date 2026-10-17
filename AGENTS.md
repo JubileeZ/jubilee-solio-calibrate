@@ -49,6 +49,13 @@ Adjust and calibrate Solio team attack and defense strengths (`Goals`, `Goals Co
 
 ---
 
+## Project Boundaries & Anti-Goals
+
+- **Strict Calibration Scope**: This repository is strictly for calibrating Solio team attack and defense ratings (`Goals`, `Goals Conceded`) and empirical Home Advantage Factor using official FPL match data, outputting upload-ready CSVs for the Solio web planner.
+- **No Squad Solvers or Player Projections**: Never implement, vendor, or adapt squad optimization solvers (such as `open-fpl-solver`, MILP/HiGHS), player minutes models, or transfer planners here. All squad solving, transfer planning, and player projection modeling belong strictly to sibling repository `fpl-jubilee-ascent` (`.agents/skills/transfer-planner`, `commands.solve`, `solver/`). See ADR 0002.
+
+---
+
 ## Code Conventions
 
 - Enforce standard Solio 3-letter team codes (`ARS`, `AVL`, `MCI`, etc.) with explicit bidirectional mapping to FPL team IDs and names.
