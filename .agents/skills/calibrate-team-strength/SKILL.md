@@ -90,7 +90,7 @@ When invoking this skill, parse the output and report directly in the response:
    - If none: explicitly state `None (0 provisional matches — all fixtures finalized)`.
 4. **Home Advantage Factor**: Clearly state the single empirical Home Advantage Factor % (e.g. `8.32%`) and instruct the user to configure this parameter in the Solio web planner. Do not state or compare against a Solio default value because it can change.
 5. **Solio Web Planner Configuration Reminder**: Explicitly remind the user to configure variance-control rules in the external Solio web planner before optimizing. By default, keep the reminder to a single prompt line:
-   `**Solio Web Planner Rules**: Remember to configure your variance-control rules before running optimization in Solio. *(Ask "show rules" for recommended baseline settings or view [`docs/research/solio-solver-rules-variance-constraints.md`](docs/research/solio-solver-rules-variance-constraints.md))*`
+   `**Solio Web Planner Rules**: Remember to configure your variance-control rules before running optimization in Solio. *(Ask "show rules" for recommended baseline settings or view [`docs/research/solio-solver-rules-variance-constraints.md`](file:///Users/jubilee/jubilee-solio-calibrate/docs/research/solio-solver-rules-variance-constraints.md))*`
    When the user explicitly asks for details or rule recommendations, present the 5-rule baseline:
    - **Hit Friction Buffer (Soft):** `Prefer not to` -> `take hit` -> `in each GW` (`1.8 pts`)
    - **Starter xMins Floor (Hard):** `Must not` -> `start` -> `players projected < 65 mins`
