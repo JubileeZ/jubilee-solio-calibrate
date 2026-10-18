@@ -1,4 +1,4 @@
-# Quantitative Justification for Solio Solver Rules & Variance Constraints
+# Quantitative Justification for Solio Planner Rules & Variance Constraints
 
 ## 1. Executive Summary & Problem Formulation
 
@@ -112,4 +112,4 @@ To balance expected points maximization with robust variance control, configure 
 ## 7. Relationship to Sibling Repository `fpl-jubilee-ascent`
 
 - **`jubilee-solio-calibrate`**: Strictly calibrates venue-neutral team ratings (`Goals`, `Goals Conceded`) and empirical Home Advantage Factor ($h$). Output CSVs and Home Advantage parameters are uploaded directly to the Solio web planner UI, where the above 5 rules are applied.
-- **`fpl-jubilee-ascent`**: Sibling solver repository owning the local MILP transfer planning engine (`open-fpl-solver`, `commands.solve`). These same 5 variance-control principles map to internal solver constraints (transfer penalty multipliers, minutes cutoffs, bench weighting, and club limits).
+- **`fpl-jubilee-ascent`**: Sibling solver repository owning the local MILP transfer planning engine (`open-fpl-solver`, `commands.solve`). These same 5 variance-control principles map to sibling MILP solver constraints (transfer penalty multipliers, minutes cutoffs, bench weighting, and club limits).

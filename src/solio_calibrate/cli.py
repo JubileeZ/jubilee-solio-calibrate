@@ -320,6 +320,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
             "blend_weight": round(effective_weight, 2),
             "team_weights": {c: round(w, 4) for c, w in team_weights.items()},
             "provisional_matches": provisional_matches_summary,
+            "planner_rules_reminder": "Configure variance-control rules in Solio web planner before optimizing.",
         }
         print(json.dumps(summary_payload, indent=2))
     else:
@@ -343,6 +344,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
                 f"Provisional Matches: {len(provisional_matches_summary)} "
                 f"({', '.join(provisional_matches_summary)})"
             )
+        print("Solio Planner Rules: Remember to configure variance-control rules in Solio web planner before optimizing.")
         print("=" * 42 + "\n")
 
     return 0

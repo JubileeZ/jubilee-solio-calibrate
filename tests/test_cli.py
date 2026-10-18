@@ -77,6 +77,8 @@ def test_cli_json_output(tmp_path: Path, capsys):
     assert "team_weights" in payload
     assert "ARS" in payload["team_weights"]
     assert "provisional_matches" in payload
+    assert "planner_rules_reminder" in payload
+
 
 
 def test_cli_ingests_and_archives_raw_and_output(tmp_path: Path):
@@ -214,6 +216,24 @@ def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
     assert team_weights["ARS"] < team_weights["AVL"]
     assert team_weights["ARS"] == pytest.approx(round(6 / 19.0, 4), abs=1e-3)
     assert team_weights["AVL"] == pytest.approx(round(7 / 19.0, 4), abs=1e-3)
+
+
+def test_cli_terminal_summary_includes_planner_rules_reminder(tmp_path: Path, capsys):
+    in_file = tmp_path / "teams_in.csv"
+    in_file.write_text("Team,Goals,Goals Conceded\nARS,2.000,1.000\n", encoding="utf-8")
+    out_file = tmp_path / "teams_out.csv"
+
+    exit_code = main_cli([
+        "--input", str(in_file),
+        "--output", str(out_file),
+        "--weight", "0.0",
+        "--offline",
+    ])
+
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "Solio Planner Rules: Remember to configure variance-control rules in Solio web planner before optimizing." in captured.out
+
 
 
 

@@ -25,7 +25,7 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Architecture Decision | `docs/adr/0001-fpl-empirical-strength-normalization.md` | ADR for empirical normalization, shrinkage, zero-GW fallback |
 | Architecture Decision | `docs/adr/0002-scope-boundary-calibration-vs-squad-solver.md` | ADR for strict calibration scope and boundary vs sibling squad solver |
 | Research Notes | `docs/research/home-advantage-bayesian-shrinkage.md` | 10-season EPL home advantage dataset, Empirical Bayes variance math, OOS backtest |
-| Research Notes | `docs/research/solio-solver-rules-variance-constraints.md` | Quantitative justification for Solio solver rules, Optimizer's Curse, covariance, 5-rule baseline |
+| Research Notes | `docs/research/solio-solver-rules-variance-constraints.md` | Quantitative justification for Solio Planner Rules, Optimizer's Curse, covariance, 5-rule baseline |
 
 
 ---
