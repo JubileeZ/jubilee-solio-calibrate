@@ -71,8 +71,7 @@ By default, team strength calibration executes the complete publish cycle upon c
    ```
 6. **Close & Delete Work Packet**: Remove the temporary work packet file, commit its removal to keep the repo clean, and push:
    ```bash
-   rm .agents/work-packets/publish-calibration-*.md
-   git add -u .agents/work-packets/
+   git rm .agents/work-packets/publish-calibration-YYYY-MM-DD.md
    git commit -m "chore: close calibration refresh packet"
    git push origin main
    ```
@@ -91,7 +90,7 @@ When invoking this skill, parse the output and report directly in the response:
    - If none: explicitly state `None (0 provisional matches — all fixtures finalized)`.
 4. **Home Advantage Factor**: Clearly state the single empirical Home Advantage Factor % (e.g. `8.32%`) and instruct the user to configure this parameter in the Solio web planner. Do not state or compare against a Solio default value because it can change.
 5. **Venue Neutrality Confirmation**: Note that the generated table values are venue-neutral, allowing Solio's planner to apply the home factor on top without double-counting.
-6. **Summary Table**: Display a Markdown comparison of original vs calibrated Goals and Goals Conceded for all 20 teams, indicating matches played (e.g. 6 matches vs 5 matches latest available) when a gameweek is partially played.
+6. **Summary Table**: Display a Markdown comparison of original vs calibrated Goals and Goals Conceded for all 20 teams, indicating matches played, the exact blend weight used (`Weight (FPL / Base)`, e.g. `37% / 63%` or `0% / 100% (Base fallback)` if unplayed) to make clear which team is using what weight when gameweeks are partially played, and data coverage.
 7. **CSV Schema Verification**: Confirm that the output CSV retains the clean Solio format (`Team,Goals,Goals Conceded`) quantized to 3 decimal places without extra metadata.
 8. **Git Publication Confirmation**: Confirm that the calibrated CSV outputs and archive snapshots were verified, committed, and pushed upstream to `origin/main` (including commit hash).
 
@@ -126,10 +125,11 @@ The calibrated `Goals` and `Goals Conceded` ratings are venue-neutral, allowing 
 
 #### 6. Complete 20-Team Calibration Summary
 
-| Team | Matches Played | Original Goals | Calibrated Goals | Original Conceded | Calibrated Conceded | Data Coverage |
-|:---|:---:|:---:|:---:|:---:|:---:|:---|
-| **ARS** | 6 | 1.974 | **1.871** | 0.890 | **0.815** | GW1–GW6 (Provisional) |
-| ... | ... | ... | ... | ... | ... | ... |
+| Team | Matches Played | Weight (FPL / Base) | Original Goals | Calibrated Goals | Original Conceded | Calibrated Conceded | Data Coverage |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| **ARS** | 6 | 37% / 63% | 1.959 | **1.866** | 0.890 | **0.804** | GW1–GW6 |
+| **AVL** | 7 | 37% / 63% | 1.410 | **1.329** | 1.558 | **1.547** | GW1–GW7 (Provisional) |
+| ... | ... | ... | ... | ... | ... | ... | ... |
 
 #### 7. CSV Schema Verification
 The exported CSV conforms strictly to Solio's standard schema (`Team,Goals,Goals Conceded`) quantized to 3 decimal places without extra metadata.
