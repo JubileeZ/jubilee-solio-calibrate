@@ -24,6 +24,8 @@ Read if no prior context. `ROADMAP.md` shows target; this file shows what exists
 | Agent Skill | `.agents/skills/calibrate-team-strength/SKILL.md` | Skill spec with default force-refresh, GW coverage, provisional matches, 20-team template, default commit-push |
 | Architecture Decision | `docs/adr/0001-fpl-empirical-strength-normalization.md` | ADR for empirical normalization, shrinkage, zero-GW fallback |
 | Architecture Decision | `docs/adr/0002-scope-boundary-calibration-vs-squad-solver.md` | ADR for strict calibration scope and boundary vs sibling squad solver |
+| Research Notes | `docs/research/home-advantage-bayesian-shrinkage.md` | 10-season EPL home advantage dataset, Empirical Bayes variance math, OOS backtest |
+
 
 ---
 

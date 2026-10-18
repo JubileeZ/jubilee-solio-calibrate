@@ -29,7 +29,7 @@ The final synthesized team attack (`Goals`) and defense (`Goals Conceded`) ratin
 _Avoid_: Adjusted rating, final score, output strength.
 
 **Home Advantage Factor**:
-The single league-wide percentage adjustment $h$ applied symmetrically to team expected goals based on venue ($\text{Home} = \text{Goals} \times (1 + h)$, $\text{Away} = \text{Goals} \times (1 - h)$). The empirical value is derived from season-to-date Premier League fixture outcomes. Solio's configured default may change, so do not assume or report a fixed default value.
+The single league-wide percentage adjustment $h$ applied symmetrically to team expected goals based on venue ($\text{Home} = \text{Goals} \times (1 + h)$, $\text{Away} = \text{Goals} \times (1 - h)$). The empirical value is derived from season-to-date Premier League fixture outcomes ($0.5 \times G + 0.5 \times xG$) shrunk toward the 5-season post-COVID Premier League prior ($9.15\%$) using $M = 380$ full-season Bayesian pseudo-matches. Solio's configured default may change, so do not assume or report a fixed default value.
 _Avoid_: Home bias, venue split, home handicap.
 
 **Active Base Strength**:

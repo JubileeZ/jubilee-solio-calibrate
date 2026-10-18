@@ -49,8 +49,8 @@ def compute_auto_weight(matches_or_gw: int) -> float:
 
 def calculate_home_advantage_factor(
     match_records: list[dict[str, Any]],
-    pseudo_matches: float = 10.0,
-    prior_factor: float = 0.096,
+    pseudo_matches: float = 380.0,
+    prior_factor: float = 0.0915,
     clamp_min: float = 0.0,
     clamp_max: float = 0.25,
 ) -> float:
@@ -61,8 +61,10 @@ def calculate_home_advantage_factor(
         Away Goals = Goals * (1 - h)
     where h = (Avg_home - Avg_away) / (Avg_home + Avg_away).
 
-    If match_records is empty (pre-season or unplayed), returns prior_factor (0.096).
-    In early gameweeks, applies Bayesian shrinkage with pseudo_matches of prior_factor.
+    If match_records is empty (pre-season or unplayed), returns prior_factor (0.0915,
+    the 5-season post-COVID Premier League pooled empirical mean across 1,900 matches).
+    Applies Empirical Bayes shrinkage with pseudo_matches=380.0 (1 full 380-match season)
+    to damp early-season sampling noise and schedule asymmetry.
     """
     if not match_records:
         return prior_factor

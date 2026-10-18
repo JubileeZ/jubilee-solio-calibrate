@@ -162,9 +162,9 @@ def test_calibrate_with_empirical_stats():
 def test_calculate_home_advantage_factor_empty():
     from solio_calibrate.calibrate import calculate_home_advantage_factor
 
-    # The empirical calculation retains its neutral baseline when no matches are available.
+    # The empirical calculation returns the 5-season post-COVID EPL prior (0.0915) when empty.
     h = calculate_home_advantage_factor([])
-    assert h == pytest.approx(0.096, abs=1e-4)
+    assert h == pytest.approx(0.0915, abs=1e-4)
 
 
 def test_calculate_home_advantage_factor_with_matches():
@@ -183,3 +183,20 @@ def test_calculate_home_advantage_factor_with_matches():
     h = calculate_home_advantage_factor(matches, pseudo_matches=0.0)
     # (1.644 - 1.356) / (1.644 + 1.356) = 0.288 / 3.0
     assert h == pytest.approx(0.096, abs=1e-4)
+
+
+def test_calculate_home_advantage_factor_default_full_season_shrinkage():
+    from solio_calibrate.calibrate import calculate_home_advantage_factor
+
+    # Simulate an extreme 10-match GW1 where home teams score 2.0 and away teams score 1.0 (raw h = 33.33%)
+    matches = [
+        {"home_goals": 2, "away_goals": 1, "home_xg": 2.0, "away_xg": 1.0}
+        for _ in range(10)
+    ]
+    # With default pseudo_matches=380.0 and prior_factor=0.0915:
+    # Weight on 10 matches is 10 / 390, so h stays anchored near ~9.77% instead of spiking above 20%
+    h = calculate_home_advantage_factor(matches)
+    expected = (10 * 0.333333 + 380 * 0.0915) / 390
+    assert h == pytest.approx(round(expected, 4), abs=1e-4)
+    assert 0.09 < h < 0.105
+
