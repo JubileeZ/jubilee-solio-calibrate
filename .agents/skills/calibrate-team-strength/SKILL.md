@@ -89,10 +89,19 @@ When invoking this skill, parse the output and report directly in the response:
    - If included: list each provisional fixture and scoreline (e.g. `ARS 2–1 LEE`), confirming live stats were factored into empirical ratings.
    - If none: explicitly state `None (0 provisional matches — all fixtures finalized)`.
 4. **Home Advantage Factor**: Clearly state the single empirical Home Advantage Factor % (e.g. `8.32%`) and instruct the user to configure this parameter in the Solio web planner. Do not state or compare against a Solio default value because it can change.
-5. **Venue Neutrality Confirmation**: Note that the generated table values are venue-neutral, allowing Solio's planner to apply the home factor on top without double-counting.
-6. **Summary Table**: Display a Markdown comparison of original vs calibrated Goals and Goals Conceded for all 20 teams, indicating matches played, the exact blend weight used (`Weight (FPL / Base)`, e.g. `37% / 63%` or `0% / 100% (Base fallback)` if unplayed) to make clear which team is using what weight when gameweeks are partially played, and data coverage.
-7. **CSV Schema Verification**: Confirm that the output CSV retains the clean Solio format (`Team,Goals,Goals Conceded`) quantized to 3 decimal places without extra metadata.
-8. **Git Publication Confirmation**: Confirm that the calibrated CSV outputs and archive snapshots were verified, committed, and pushed upstream to `origin/main` (including commit hash).
+5. **Solio Web Planner Configuration Reminder**: Explicitly remind the user to configure variance-control rules in the external Solio web planner before optimizing. By default, keep the reminder to a single prompt line:
+   `**Solio Web Planner Rules**: Remember to configure your variance-control rules before running optimization in Solio. *(Ask "show rules" for recommended baseline settings or view [`docs/research/solio-solver-rules-variance-constraints.md`](docs/research/solio-solver-rules-variance-constraints.md))*`
+   When the user explicitly asks for details or rule recommendations, present the 5-rule baseline:
+   - **Hit Friction Buffer (Soft):** `Prefer not to` -> `take hit` -> `in each GW` (`1.8 pts`)
+   - **Starter xMins Floor (Hard):** `Must not` -> `start` -> `players projected < 65 mins`
+   - **First-Bench Cover Protection (Soft):** `Prefer to` -> `own` -> `≥ 12 players projected > 65 mins` (`1.5 pts`)
+   - **Defensive Stack Limiter (Soft):** `Prefer to` -> `start` -> `≤ 2 DEF/GKP from each club` (`1.2 pts`)
+   - **Goalkeeper Friction (Soft):** `Prefer not to` -> `buy` -> `goalkeepers` (`1.5 pts`)
+   Plus attacking correlation guidance (avoid hard caps on elite attacks; soft cap 0.8–1.0 pts on mid-table/low-xG attacks) and cross-play advice (do not enable cross-play penalty).
+6. **Venue Neutrality Confirmation**: Note that the generated table values are venue-neutral, allowing Solio's planner to apply the home factor on top without double-counting.
+7. **Summary Table**: Display a Markdown comparison of original vs calibrated Goals and Goals Conceded for all 20 teams, indicating matches played, the exact blend weight used (`Weight (FPL / Base)`, e.g. `37% / 63%` or `0% / 100% (Base fallback)` if unplayed) to make clear which team is using what weight when gameweeks are partially played, and data coverage.
+8. **CSV Schema Verification**: Confirm that the output CSV retains the clean Solio format (`Team,Goals,Goals Conceded`) quantized to 3 decimal places without extra metadata.
+9. **Git Publication Confirmation**: Confirm that the calibrated CSV outputs and archive snapshots were verified, committed, and pushed upstream to `origin/main` (including commit hash).
 
 ### Report Template
 
@@ -104,8 +113,8 @@ Use this Markdown layout for the user-facing report:
 The calibrated team strengths have been computed and exported using official FPL match data.
 
 #### 1. Calibrated Output File
-- **Calibrated CSV:** [`data/output/team_strengths_calibrated.csv`](file:///home/jubileez/jubilee-solio-calibrate/data/output/team_strengths_calibrated.csv)
-- **Archived Snapshot:** [`data/output/archive/team_strengths_calibrated_<TIMESTAMP>.csv`](file:///home/jubileez/jubilee-solio-calibrate/data/output/archive/team_strengths_calibrated_<TIMESTAMP>.csv)
+- **Calibrated CSV:** [`data/output/team_strengths_calibrated.csv`](file:///Users/jubilee/jubilee-solio-calibrate/data/output/team_strengths_calibrated.csv)
+- **Archived Snapshot:** [`data/output/archive/team_strengths_calibrated_<TIMESTAMP>.csv`](file:///Users/jubilee/jubilee-solio-calibrate/data/output/archive/team_strengths_calibrated_<TIMESTAMP>.csv)
 
 #### 2. Gameweek Coverage
 - **Gameweek Coverage:** **GW1–GW<X> (plus <N> provisional matches in GW<Y>)**
@@ -120,10 +129,13 @@ The calibrated team strengths have been computed and exported using official FPL
 - **Empirical Home Advantage Factor ($h$):** **`<FACTOR>%`**
 - Configure this value in the Solio web planner setting.
 
-#### 5. Venue Neutrality Confirmation
+#### 5. Solio Web Planner Configuration Reminder
+- **Solio Web Planner Rules**: Remember to configure your variance-control rules before running optimization in Solio. *(Ask "show rules" for recommended baseline settings or view [`docs/research/solio-solver-rules-variance-constraints.md`](file:///Users/jubilee/jubilee-solio-calibrate/docs/research/solio-solver-rules-variance-constraints.md))*
+
+#### 6. Venue Neutrality Confirmation
 The calibrated `Goals` and `Goals Conceded` ratings are venue-neutral, allowing Solio's planner to apply the home factor on top without double-counting.
 
-#### 6. Complete 20-Team Calibration Summary
+#### 7. Complete 20-Team Calibration Summary
 
 | Team | Matches Played | Weight (FPL / Base) | Original Goals | Calibrated Goals | Original Conceded | Calibrated Conceded | Data Coverage |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---|
@@ -131,10 +143,10 @@ The calibrated `Goals` and `Goals Conceded` ratings are venue-neutral, allowing 
 | **AVL** | 7 | 37% / 63% | 1.410 | **1.329** | 1.558 | **1.547** | GW1–GW7 (Provisional) |
 | ... | ... | ... | ... | ... | ... | ... | ... |
 
-#### 7. CSV Schema Verification
+#### 8. CSV Schema Verification
 The exported CSV conforms strictly to Solio's standard schema (`Team,Goals,Goals Conceded`) quantized to 3 decimal places without extra metadata.
 
-#### 8. Git Publication Status
+#### 9. Git Publication Status
 - **Commit:** `<COMMIT_HASH>` (`data: refresh GW<X> team strength calibration`)
 - **Remote:** Pushed to `origin/main`
 ````

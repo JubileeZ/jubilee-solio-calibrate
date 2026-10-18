@@ -60,3 +60,8 @@ _Avoid_: Round window, matchweek span, GW count.
 The individualized weighting $\lambda_i \in [0.0, 1.0]$ applied between Base Strength and FPL Empirical Form for team $i$, proportional to that team's completed match sample size ($\min(n_i / 19.0, 1.0)$ under auto-weighting).
 _Avoid_: Global team weight, uniform weight.
 
+**Solio Planner Rules**:
+Empirical variance-control constraints and penalty parameters configured in the external Solio web planner UI (e.g. hit friction buffer, starter xMins floor, defensive stack limiter) designed to counteract the Optimizer's Curse and tail-risk covariance in MILP squad optimization.
+_Avoid_: Solver constraints, local rules, internal solver config.
+
+
