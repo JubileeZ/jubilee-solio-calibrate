@@ -194,9 +194,8 @@ def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
     )
     out_file = tmp_path / "teams_out.csv"
 
-    # In offline mode with cached GW7 fixtures:
-    # ARS has 6 matches -> weight ~ 6/19 = 0.3158
-    # AVL has 7 matches -> weight ~ 7/19 = 0.3684
+    # In offline mode with cached GW7 fixtures, NFO 0-1 ARS is now
+    # provisionally finished, so ARS and AVL both have 7 matches.
     exit_code = main_cli([
         "--input", str(in_file),
         "--output", str(out_file),
@@ -212,9 +211,7 @@ def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
 
     assert "ARS" in team_weights
     assert "AVL" in team_weights
-    # Verify ARS (6 matches) has lower weight than AVL (7 matches)
-    assert team_weights["ARS"] < team_weights["AVL"]
-    assert team_weights["ARS"] == pytest.approx(round(6 / 19.0, 4), abs=1e-3)
+    assert team_weights["ARS"] == pytest.approx(round(7 / 19.0, 4), abs=1e-3)
     assert team_weights["AVL"] == pytest.approx(round(7 / 19.0, 4), abs=1e-3)
 
 
