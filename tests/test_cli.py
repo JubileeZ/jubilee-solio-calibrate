@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from solio_calibrate.cli import main_cli
 from solio_calibrate.io import load_solio_team_strengths
 
@@ -71,6 +73,9 @@ def test_cli_json_output(tmp_path: Path, capsys):
     assert payload["calibrated_file"] == str(out_file.resolve())
     assert payload["teams_calibrated"] == 1
     assert "home_factor_pct" in payload
+    assert "blend_weight" in payload
+    assert "team_weights" in payload
+    assert "ARS" in payload["team_weights"]
     assert "provisional_matches" in payload
 
 
@@ -175,5 +180,40 @@ def test_cli_random_filename_ingestion(tmp_path: Path):
     # 4. Output archive is always team_strengths_calibrated_<timestamp>.csv
     out_archives = list((output_dir / "archive").glob("team_strengths_calibrated_*.csv"))
     assert len(out_archives) == 1
+
+
+def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
+    import json
+
+    in_file = tmp_path / "teams_in.csv"
+    in_file.write_text(
+        "Team,Goals,Goals Conceded\nARS,2.000,1.000\nAVL,2.000,1.000\n",
+        encoding="utf-8",
+    )
+    out_file = tmp_path / "teams_out.csv"
+
+    # In offline mode with cached GW7 fixtures:
+    # ARS has 6 matches -> weight ~ 6/19 = 0.3158
+    # AVL has 7 matches -> weight ~ 7/19 = 0.3684
+    exit_code = main_cli([
+        "--input", str(in_file),
+        "--output", str(out_file),
+        "--auto-weight",
+        "--offline",
+        "--json",
+    ])
+
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    team_weights = payload["team_weights"]
+
+    assert "ARS" in team_weights
+    assert "AVL" in team_weights
+    # Verify ARS (6 matches) has lower weight than AVL (7 matches)
+    assert team_weights["ARS"] < team_weights["AVL"]
+    assert team_weights["ARS"] == pytest.approx(round(6 / 19.0, 4), abs=1e-3)
+    assert team_weights["AVL"] == pytest.approx(round(7 / 19.0, 4), abs=1e-3)
+
 
 

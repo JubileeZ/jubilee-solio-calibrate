@@ -30,20 +30,21 @@ class CalibrationConfig:
     defense_scale: float = 1.00
     team_multipliers: dict[str, dict[str, float]] = field(default_factory=dict)
     min_value: float = 0.05
+    team_weights: dict[str, float] = field(default_factory=dict)
 
 
-def compute_auto_weight(max_finished_gw: int) -> float:
-    """Compute recommended empirical blend weight based on season progress.
+def compute_auto_weight(matches_or_gw: int) -> float:
+    """Compute recommended empirical blend weight based on matches played or season progress.
 
-    Decays linearly from 100% Solio baseline (weight=0.0) at pre-season (GW <= 0)
-    to 100% empirical season stats (weight=1.0) once half the season (GW19)
-    has finished. From GW20 onward, weight remains 1.0 (pure season stats).
+    Decays linearly from 100% Solio baseline (weight=0.0) at 0 matches/GW
+    to 100% empirical season stats (weight=1.0) once half the season (19 matches/GW)
+    has been reached. From 19 onward, weight remains 1.0 (pure season stats).
     """
-    if max_finished_gw <= 0:
+    if matches_or_gw <= 0:
         return 0.0
-    if max_finished_gw >= 19:
+    if matches_or_gw >= 19:
         return 1.0
-    return round(max_finished_gw / 19.0, 4)
+    return round(matches_or_gw / 19.0, 4)
 
 
 def calculate_home_advantage_factor(
@@ -275,7 +276,13 @@ def calibrate_team_strengths(
         team_stats = fpl_stats.get(code, {})
         matches_played = team_stats.get("matches_played", 0)
 
-        if matches_played > 0 and config.weight > 0.0:
+        effective_weight = (
+            config.team_weights.get(code, config.weight)
+            if config.team_weights
+            else config.weight
+        )
+
+        if matches_played > 0 and effective_weight > 0.0:
             if "empirical_attack_per_match" in team_stats:
                 fpl_goals = team_stats["empirical_attack_per_match"]
             else:
@@ -296,8 +303,8 @@ def calibrate_team_strengths(
                     config.recent_weight * recent_conceded_pg
                 )
 
-            goals = (1.0 - config.weight) * base_goals + (config.weight * fpl_goals)
-            conceded = (1.0 - config.weight) * base_conceded + (config.weight * fpl_conceded)
+            goals = (1.0 - effective_weight) * base_goals + (effective_weight * fpl_goals)
+            conceded = (1.0 - effective_weight) * base_conceded + (effective_weight * fpl_conceded)
         else:
             goals = base_goals
             conceded = base_conceded

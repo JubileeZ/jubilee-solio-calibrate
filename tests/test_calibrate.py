@@ -59,6 +59,35 @@ def test_calibrate_blend_fpl_performance():
     assert result.iloc[0]["Goals Conceded"] == pytest.approx(0.75, abs=1e-3)
 
 
+def test_calibrate_per_team_weights():
+    df = pd.DataFrame([
+        {"Team": "ARS", "Goals": 2.0, "Goals Conceded": 1.0},
+        {"Team": "AVL", "Goals": 2.0, "Goals Conceded": 1.0},
+    ])
+    fpl_stats = {
+        "ARS": {
+            "matches_played": 6,
+            "empirical_attack_per_match": 3.0,
+            "empirical_defense_per_match": 0.5,
+        },
+        "AVL": {
+            "matches_played": 7,
+            "empirical_attack_per_match": 3.0,
+            "empirical_defense_per_match": 0.5,
+        },
+    }
+
+    # ARS uses 6/19 = 0.3158; AVL uses 7/19 = 0.3684
+    team_weights = {"ARS": 0.3158, "AVL": 0.3684}
+    config = CalibrationConfig(weight=0.50, team_weights=team_weights)
+    result = calibrate_team_strengths(df, fpl_stats, config=config)
+
+    # ARS: (1 - 0.3158) * 2.0 + 0.3158 * 3.0 = 1.3684 + 0.9474 = 2.3158 -> 2.316
+    assert result.loc[result["Team"] == "ARS", "Goals"].values[0] == pytest.approx(2.316, abs=1e-3)
+    # AVL: (1 - 0.3684) * 2.0 + 0.3684 * 3.0 = 1.2632 + 1.1052 = 2.3684 -> 2.368
+    assert result.loc[result["Team"] == "AVL", "Goals"].values[0] == pytest.approx(2.368, abs=1e-3)
+
+
 def test_calibrate_with_team_multipliers():
     df = pd.DataFrame([{"Team": "ARS", "Goals": 2.0, "Goals Conceded": 1.0}])
     fpl_stats = {}

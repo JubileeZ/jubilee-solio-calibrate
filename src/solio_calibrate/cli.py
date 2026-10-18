@@ -207,18 +207,6 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
     except (httpx.HTTPError, OSError, ValueError, KeyError):
         max_gw = 0
 
-    # Weight resolution: unconditional fallback to 0.0 if no gameweeks have finished
-    if max_gw <= 0:
-        effective_weight = 0.0
-        logger.info("No finished gameweeks detected; using 100% Solio base values (weight=0.00).")
-    elif args.auto_weight:
-        effective_weight = compute_auto_weight(max_gw)
-        logger.info(
-            f"Auto-weight evaluated for max finished GW{max_gw}: weight={effective_weight:.2f}"
-        )
-    else:
-        effective_weight = args.weight
-
     # Fetch empirical match records and compute Home Advantage Factor
     fpl_stats: dict[str, dict[str, Any]] = {}
     provisional_matches_summary: list[str] = []
@@ -248,6 +236,29 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
             f"Could not load empirical match records ({e}); falling back to base values."
         )
 
+    # Weight resolution: per-team weights based on matches played or manual override
+    team_weights: dict[str, float] = {}
+    team_codes = [str(t).strip().upper() for t in base_df["Team"]]
+
+    if max_gw <= 0:
+        effective_weight = 0.0
+        team_weights = {code: 0.0 for code in team_codes}
+        logger.info("No finished gameweeks detected; using 100% Solio base values (weight=0.00).")
+    elif args.auto_weight:
+        for code in team_codes:
+            matches_played = fpl_stats.get(code, {}).get("matches_played", 0)
+            team_weights[code] = compute_auto_weight(matches_played)
+        effective_weight = max(team_weights.values()) if team_weights else 0.0
+        logger.info(
+            f"Auto-weight evaluated for max finished GW{max_gw}: max weight={effective_weight:.2f}"
+        )
+    else:
+        effective_weight = args.weight
+        team_weights = {
+            code: args.weight if fpl_stats.get(code, {}).get("matches_played", 0) > 0 else 0.0
+            for code in team_codes
+        }
+
     # Parse team boosts
     team_multipliers: dict[str, dict[str, float]] = {}
     for boost in args.team_boost:
@@ -272,6 +283,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
         attack_scale=args.attack_scale,
         defense_scale=args.defense_scale,
         team_multipliers=team_multipliers,
+        team_weights=team_weights,
     )
 
     logger.info(f"Calibrating {len(base_df)} teams (weight={effective_weight:.2f})...")
@@ -306,6 +318,7 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
             "finished_gameweeks": max_gw,
             "home_factor_pct": round(home_factor * 100, 2),
             "blend_weight": round(effective_weight, 2),
+            "team_weights": {c: round(w, 4) for c, w in team_weights.items()},
             "provisional_matches": provisional_matches_summary,
         }
         print(json.dumps(summary_payload, indent=2))
@@ -318,7 +331,13 @@ def main_cli(argv: Sequence[str] | None = None) -> int:
         print(f"Teams Calibrated: {len(calibrated_df)}")
         print(f"Finished Gameweeks: {max_gw}")
         print(f"Empirical Home Advantage Factor: {home_factor * 100:.2f}%")
-        print(f"Effective Blend Weight: {effective_weight * 100:.1f}%")
+        distinct_weights = {round(w, 2) for w in team_weights.values()}
+        if len(distinct_weights) > 1:
+            min_w = min(team_weights.values()) * 100
+            max_w = max(team_weights.values()) * 100
+            print(f"Effective Blend Weights: {min_w:.1f}% - {max_w:.1f}%")
+        else:
+            print(f"Effective Blend Weight: {effective_weight * 100:.1f}%")
         if provisional_matches_summary:
             print(
                 f"Provisional Matches: {len(provisional_matches_summary)} "

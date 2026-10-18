@@ -55,3 +55,8 @@ _Avoid_: Live match, in-progress game, tentative fixture.
 **Gameweek Coverage**:
 The numerical range of Premier League rounds incorporated into a calibration run, identified by the highest completed gameweek plus any provisionally finished matches in the current gameweek.
 _Avoid_: Round window, matchweek span, GW count.
+
+**Team-Specific Blend Weight**:
+The individualized weighting $\lambda_i \in [0.0, 1.0]$ applied between Base Strength and FPL Empirical Form for team $i$, proportional to that team's completed match sample size ($\min(n_i / 19.0, 1.0)$ under auto-weighting).
+_Avoid_: Global team weight, uniform weight.
+
