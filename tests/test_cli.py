@@ -189,13 +189,14 @@ def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
 
     in_file = tmp_path / "teams_in.csv"
     in_file.write_text(
-        "Team,Goals,Goals Conceded\nARS,2.000,1.000\nAVL,2.000,1.000\n",
+        "Team,Goals,Goals Conceded\nARS,2.000,1.000\nAVL,2.000,1.000\nLIV,2.000,1.000\n",
         encoding="utf-8",
     )
     out_file = tmp_path / "teams_out.csv"
 
-    # In offline mode with cached GW7 fixtures, NFO 0-1 ARS is now
-    # provisionally finished, so ARS and AVL both have 7 matches.
+    # In offline mode with cached GW8 fixtures:
+    # ARS and AVL have 8 matches (provisional GW8) -> weight ~ 8/19 = 0.4211
+    # LIV has 7 matches (GW8 not yet played) -> weight ~ 7/19 = 0.3684
     exit_code = main_cli([
         "--input", str(in_file),
         "--output", str(out_file),
@@ -211,8 +212,11 @@ def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
 
     assert "ARS" in team_weights
     assert "AVL" in team_weights
-    assert team_weights["ARS"] == pytest.approx(round(7 / 19.0, 4), abs=1e-3)
-    assert team_weights["AVL"] == pytest.approx(round(7 / 19.0, 4), abs=1e-3)
+    assert "LIV" in team_weights
+    assert team_weights["LIV"] < team_weights["ARS"]
+    assert team_weights["ARS"] == pytest.approx(round(8 / 19.0, 4), abs=1e-3)
+    assert team_weights["AVL"] == pytest.approx(round(8 / 19.0, 4), abs=1e-3)
+    assert team_weights["LIV"] == pytest.approx(round(7 / 19.0, 4), abs=1e-3)
 
 
 def test_cli_terminal_summary_includes_planner_rules_reminder(tmp_path: Path, capsys):
