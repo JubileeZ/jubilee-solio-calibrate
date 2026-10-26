@@ -184,8 +184,10 @@ def test_cli_random_filename_ingestion(tmp_path: Path):
     assert len(out_archives) == 1
 
 
-def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
+def test_cli_auto_weight_per_team(tmp_path: Path, capsys, monkeypatch):
     import json
+
+    from solio_calibrate.client import FPLClient
 
     in_file = tmp_path / "teams_in.csv"
     in_file.write_text(
@@ -194,9 +196,48 @@ def test_cli_auto_weight_per_team(tmp_path: Path, capsys):
     )
     out_file = tmp_path / "teams_out.csv"
 
-    # In offline mode with cached GW8 fixtures:
-    # ARS and AVL have 8 matches (provisional GW8) -> weight ~ 8/19 = 0.4211
-    # LIV has 7 matches (GW8 not yet played) -> weight ~ 7/19 = 0.3684
+    # Deterministic mock fixtures: GW8 is max finished
+    monkeypatch.setattr(
+        FPLClient,
+        "get_cached_fixtures",
+        lambda self: [{"event": 8, "finished": True}],
+    )
+
+    # Deterministic mock match records:
+    # ARS and AVL have 8 matches -> weight ~ 8/19 = 0.4211
+    # LIV has 7 matches -> weight ~ 7/19 = 0.3684
+    mock_records = []
+    for gw in range(1, 9):
+        mock_records.append({
+            "fixture_id": gw,
+            "event": gw,
+            "home_team": "ARS",
+            "away_team": "AVL",
+            "home_goals": 1,
+            "away_goals": 1,
+            "home_xg": 1.0,
+            "away_xg": 1.0,
+            "is_provisional": False,
+        })
+    for gw in range(1, 8):
+        mock_records.append({
+            "fixture_id": 100 + gw,
+            "event": gw,
+            "home_team": "LIV",
+            "away_team": "CHE",
+            "home_goals": 2,
+            "away_goals": 1,
+            "home_xg": 1.5,
+            "away_xg": 0.8,
+            "is_provisional": False,
+        })
+
+    monkeypatch.setattr(
+        FPLClient,
+        "get_match_records",
+        lambda self, **kwargs: mock_records,
+    )
+
     exit_code = main_cli([
         "--input", str(in_file),
         "--output", str(out_file),
