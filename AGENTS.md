@@ -115,7 +115,7 @@ JIT (read when task needs): full `CONTEXT.md`, `progress.md`, `issue-tracker.md`
 ## Work State & Checkpoints
 
 - Tracker: `docs/agents/issue-tracker.md`. Updates/compaction/archive/cleanup: `docs/agents/progress.md`.
-- Autonomous progress & push: user prompt asking to update progress and commit/push authorizes full cycle: update packet/docs, run `bash tests/verify.sh`, commit, and `git push`. Calibration skill runs authorize full publish cycle for calibration data by default.
+- Autonomous progress & push: user prompt asking to update progress and commit/push authorizes full cycle: update packet/docs, run `bash tests/verify.sh`, commit, and `git push`.
 - Code commits: stage a Work Packet under `.agents/work-packets/` with code — `commit-gate` enforces. Finished packet: delete the file in the same Checkpoint. Trivial: minimal packet OK.
 - Handoff / device switch / leave-for-other-agent: write Packet ID to `.agents/handoff-pointer` and commit the packet. Other device: pull, then Bind that Packet ID.
 - Cleanup when task complete: delete `implementation_plan.md` / `walkthrough.md`; **delete** the packet file (do not empty). Next task: new packet from `.agents/work-packet.md.tmpl`. Durable state stays in ROADMAP / current-state / git.
